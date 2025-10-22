@@ -1,14 +1,14 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Login from "../views/Login.vue";
 import Register from "../views/Register.vue";
-// import Dashboard from "../views/Dashboard.vue";
+import Dashboard from "../views/Dashboard.vue";
 // import Transactions from "../views/Transactions.vue";
 import { useAuthStore } from "../stores/auth";
 
 const routes = [
   { path: "/login", component: Login },
   { path: "/register", component: Register },
-  // { path: "/", component: Dashboard, meta: { requiresAuth: true } },
+  { path: "/", component: Dashboard, meta: { requiresAuth: true } },
   // { path: "/transactions", component: Transactions, meta: { requiresAuth: true } },
 ];
 
