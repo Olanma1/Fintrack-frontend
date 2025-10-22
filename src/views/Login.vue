@@ -34,7 +34,7 @@
               <a href="/register" class="font-semibold text-indigo-600 hover:text-indigo-300">Don't have an account? Sign up!</a>
             </div>
         <div>
-          <button type="submit" class="cursor-pointer flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Sign in</button>
+          <button type="submit" class="cursor-pointer flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Login</button>
         </div>
       </form>
     </div>
