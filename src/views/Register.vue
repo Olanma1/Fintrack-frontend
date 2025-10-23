@@ -61,6 +61,5 @@ const router = useRouter();
 
 const register = async () => {
   await auth.register({ name: name.value, email: email.value, password: password.value, password_confirmation: password_confirmation.value });
-  router.push("/");
 };
 </script>
