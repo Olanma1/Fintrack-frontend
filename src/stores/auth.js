@@ -16,11 +16,10 @@ export const useAuthStore = defineStore("auth", {
     },
 
     async register(payload) {
-      const { data } = await api.post("/register", payload);
+      await api.post("/register", payload);
       localStorage.setItem("pending_email", payload.email);
       window.location.href = "/verify-otp";
     },
-
 
     async logout() {
       await api.post("/logout");
