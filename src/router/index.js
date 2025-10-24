@@ -5,13 +5,14 @@ import VerifyOtp from "../views/VerifyOtp.vue";
 import Dashboard from "../views/Dashboard.vue";
 // import Transactions from "../views/Transactions.vue";
 import { useAuthStore } from "../stores/auth";
+import Profile from "@/views/Profile.vue";
 
 const routes = [
   { path: "/login", component: Login },
   { path: "/register", component: Register },
   { path: "/verify-otp", component: VerifyOtp },
   { path: "/", component: Dashboard, meta: { requiresAuth: true } },
-  // { path: "/transactions", component: Transactions, meta: { requiresAuth: true } },
+  { path: "/profile", component: Profile, meta: { requiresAuth: true } },
 ];
 
 const router = createRouter({
