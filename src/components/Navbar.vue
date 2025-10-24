@@ -136,7 +136,7 @@ const auth = useAuthStore()
 const router = useRouter()
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', current: true },
+  { name: 'Dashboard', href: '/', current: true },
   { name: 'Goals', href: '/goals', current: false },
   { name: 'Expenses', href: '/expenses', current: false },
   { name: 'Income', href: '/income', current: false },
