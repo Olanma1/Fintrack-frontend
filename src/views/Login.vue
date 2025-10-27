@@ -55,7 +55,7 @@ const auth = useAuthStore();
 const login = async () => {
   try {
     await auth.login(email.value, password.value);
-    router.push("/");
+    router.push("/insights");
   } catch {
     alert("Invalid credentials");
   }

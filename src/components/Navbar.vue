@@ -13,17 +13,17 @@
           <div class="ml-4 text-indigo-500 font-bold">💰 FinTrack</div>
           <div class="hidden md:block">
             <div class="ml-10 flex items-baseline space-x-4">
-             <router-link
+            <router-link
                 v-for="item in navigation"
                 :key="item.name"
                 :to="item.href"
                 :class="[
-                  item.current
-                    ? 'bg-gray-950/50 text-white'
-                    : 'text-gray-300 hover:bg-white/5 hover:text-white',
-                  'rounded-md px-3 py-2 text-sm font-medium'
+                  isActive(item.href)
+                    ? 'bg-gray-700 text-white font-semibold shadow-sm'
+                    : 'text-gray-300 hover:bg-white/10 hover:text-white',
+                  'rounded-md px-3 py-2 text-sm transition-all duration-150'
                 ]"
-                :aria-current="item.current ? 'page' : undefined"
+                :aria-current="isActive(item.href) ? 'page' : undefined"
               >
                 {{ item.name }}
             </router-link>
@@ -112,13 +112,13 @@
           as="a"
           :href="item.href"
           :class="[
-            item.current
-              ? 'bg-gray-950/50 text-white'
-              : 'text-gray-300 hover:bg-white/5 hover:text-white',
-            'block rounded-md px-3 py-2 text-base font-medium',
+            isActive(item.href)
+              ? 'bg-gray-900 text-white font-semibold shadow-sm'
+              : 'text-gray-300 hover:bg-white/10 hover:text-white',
+            'rounded-md px-3 py-2 text-sm transition-all duration-150'
           ]"
-          :aria-current="item.current ? 'page' : undefined"
-        >
+            :aria-current="isActive(item.href) ? 'page' : undefined"
+          >
           {{ item.name }}
         </DisclosureButton>
       </div>
@@ -130,17 +130,19 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '../stores/auth'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 const auth = useAuthStore()
 const router = useRouter()
+const route = useRoute()
 
+// Navigation items (no need for 'current' here)
 const navigation = [
-  { name: 'Dashboard', href: '/', current: true },
-  { name: 'Goals', href: '/goals', current: false },
-  { name: 'Expenses', href: '/expenses', current: false },
-  { name: 'Income', href: '/income', current: false },
-  { name: 'Analytics', href: '/analytics', current: false },
+  { name: 'Transaction', href: '/transactions' },
+  { name: 'Goals', href: '/goals' },
+  { name: 'Expenses', href: '/expenses' },
+  { name: 'Income', href: '/income' },
+  { name: 'Analytics', href: '/insights' },
 ]
 
 const userNavigation = [
@@ -157,4 +159,8 @@ const logout = async () => {
     console.error('Logout failed:', error)
   }
 }
+
+// Helper function to check if a route is active
+const isActive = (path) => route.path === path
 </script>
+
