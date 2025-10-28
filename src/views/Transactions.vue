@@ -50,7 +50,7 @@
 
           <button
             type="submit"
-            class="w-full bg-indigo-500 text-white py-2 rounded-md font-semibold hover:bg-indigo-400 transition"
+            class="w-full bg-indigo-500 text-white py-2 rounded-md font-semibold hover:bg-indigo-400 cursor-pointer transition"
           >
             Save Transaction
           </button>

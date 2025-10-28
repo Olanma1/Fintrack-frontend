@@ -8,6 +8,9 @@ import Profile from "@/views/Profile.vue";
 import Transactions from "../views/Transactions.vue";
 import Wallet from "../views/Wallet.vue";
 import Insights from "../views/Insights.vue";
+import Goals from "@/views/Goals.vue";
+import Expense from "@/views/Expense.vue";
+import Income from "@/views/Income.vue";
 
 const routes = [
   { path: "/login", component: Login },
@@ -17,6 +20,9 @@ const routes = [
   { path: "/profile", component: Profile, meta: { requiresAuth: true } },
   { path: "/transactions", component: Transactions, meta: { requiresAuth: true } },
   { path: "/wallet", component: Wallet, meta: { requiresAuth: true } },
+  { path: "/goals", component: Goals, meta: { requiresAuth: true } },
+  { path: "/expenses", component: Expense, meta: { requiresAuth: true } },
+  { path: "/income", component: Income, meta: { requiresAuth: true } },
   { path: "/insights", component: Insights, meta: { requiresAuth: true } },
 ];
 

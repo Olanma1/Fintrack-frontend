@@ -142,6 +142,7 @@ const navigation = [
   { name: 'Goals', href: '/goals' },
   { name: 'Expenses', href: '/expenses' },
   { name: 'Income', href: '/income' },
+  { name: 'Wallet', href: '/wallet' },
   { name: 'Analytics', href: '/insights' },
 ]
 
