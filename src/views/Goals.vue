@@ -61,8 +61,9 @@
               ></div>
             </div>
             <p class="text-xs text-gray-500 mt-1">
-              {{ computeProgress(goal).toFixed(0) }}% achieved
-            </p>
+                ₦{{ Number(goal.current_amount).toLocaleString() }} saved —
+                {{ computeProgress(goal).toFixed(0) }}% achieved
+             </p>
           </div>
 
           <button
@@ -104,11 +105,11 @@ const handleDeleteGoal = async (id) => {
 };
 
 const computeProgress = (goal) => {
-  // If your backend sends saved_amount, compute progress
-  const saved = Number(goal.saved_amount || 0);
+  const saved = Number(goal.current_amount || 0); 
   const target = Number(goal.target_amount || 1);
   return Math.min((saved / target) * 100, 100);
 };
+
 
 const formatDate = (date) => new Date(date).toLocaleDateString();
 

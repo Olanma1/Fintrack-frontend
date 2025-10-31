@@ -49,6 +49,24 @@
             </select>
           </div>
 
+          <!-- Goal -->
+          <div>
+            <label class="block text-sm font-medium text-gray-600">Goal</label>
+            <select
+              v-model="form.goal_id"
+              class="w-full rounded-md bg-indigo-500/5 text-gray-700 px-3 py-2 outline-indigo-500/10 focus:outline-2 focus:outline-indigo-500"
+            >
+              <option value="">No Goal</option>
+              <option
+                v-for="goal in goalStore.goals"
+                :key="goal.id"
+                :value="goal.id"
+              >
+                {{ goal.name }} — Target ₦{{ goal.target_amount.toLocaleString() }}
+              </option>
+            </select>
+          </div>
+
           <!-- Amount -->
           <div>
             <label class="block text-sm font-medium text-gray-600">Amount</label>
@@ -104,11 +122,10 @@
             <p class="text-gray-800 font-semibold">
               {{ tx.note || tx.category?.name || tx.type }}
             </p>
-            <p class="text-sm text-gray-500">
-              {{ formatDate(tx.created_at) }}
-            </p>
+            <p class="text-sm text-gray-500">{{ formatDate(tx.created_at) }}</p>
             <p class="text-xs text-gray-400 capitalize">
               {{ tx.type }} • {{ tx.category?.name || 'Uncategorized' }}
+              <span v-if="tx.goal">• Goal: {{ tx.goal.name }}</span>
             </p>
           </div>
           <p
@@ -126,20 +143,19 @@
 
 <script setup>
 import Navbar from "../components/Navbar.vue";
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useTransactionStore } from "../stores/transaction";
 import { useCategoryStore } from "../stores/category";
+import { useGoalStore } from "../stores/goals";
 
 const transactionStore = useTransactionStore();
 const categoryStore = useCategoryStore();
+const goalStore = useGoalStore();
 
 const showForm = ref(false);
-const form = ref({ type: "", category_id: "", amount: "", note: "" });
+const form = ref({ type: "", category_id: "", goal_id: "", amount: "", note: "" });
 
-// ✅ Use categories directly from the store
 const categories = computed(() => categoryStore.categories);
-
-// ✅ Filtered categories depend on selected type
 const filteredCategories = computed(() => {
   if (!form.value.type) return [];
   return categories.value.filter((cat) => cat.type === form.value.type);
@@ -151,7 +167,8 @@ const createTransaction = async () => {
     return;
   }
   await transactionStore.addTransaction(form.value);
-  form.value = { type: "", category_id: "", amount: "", note: "" };
+  await goalStore.fetchGoals();
+  form.value = { type: "", category_id: "", goal_id: "", amount: "", note: "" };
   showForm.value = false;
 };
 
@@ -159,7 +176,7 @@ const formatDate = (date) => new Date(date).toLocaleDateString();
 
 onMounted(async () => {
   await categoryStore.fetchCategories();
+  await goalStore.fetchGoals();
   await transactionStore.fetchTransactions();
 });
 </script>
-
