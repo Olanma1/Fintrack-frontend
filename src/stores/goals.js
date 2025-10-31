@@ -20,7 +20,7 @@ export const useGoalStore = defineStore("goals", {
           : response.data.data || [];
       } catch (err) {
         console.error("Failed to fetch goals:", err);
-        this.error = "Failed to load goals";
+        this.error = err.response?.data?.message || "Failed to load goals";
       } finally {
         this.loading = false;
       }
@@ -36,8 +36,8 @@ export const useGoalStore = defineStore("goals", {
           this.goals.unshift(goal);
         }
       } catch (err) {
-        console.error("Failed to add goal:", err);
-        this.error = "Failed to create goal";
+        this.error = err.response?.data?.message || "Failed to create goal";
+        throw err; 
       }
     },
 
@@ -50,8 +50,8 @@ export const useGoalStore = defineStore("goals", {
           if (index !== -1) this.goals[index] = updatedGoal;
         }
       } catch (err) {
-        console.error("Failed to update goal:", err);
-        this.error = "Failed to update goal";
+        this.error = err.response?.data?.message || "Failed to update goal";
+        throw err;
       }
     },
 
@@ -60,8 +60,8 @@ export const useGoalStore = defineStore("goals", {
         await api.delete(`/goals/${id}`);
         this.goals = this.goals.filter((g) => g.id !== id);
       } catch (err) {
-        console.error("Failed to delete goal:", err);
-        this.error = "Failed to delete goal";
+       this.error = err.response?.data?.message || "Failed to delete goal";
+        throw err;
       }
     },
   },

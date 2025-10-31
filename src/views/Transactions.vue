@@ -6,12 +6,21 @@
       <!-- Header -->
       <div class="flex justify-between items-center mb-8">
         <h1 class="text-2xl font-bold text-gray-800">Transactions</h1>
+
         <button
           @click="showForm = !showForm"
           class="rounded-md bg-indigo-500 px-4 py-2 text-white font-medium hover:bg-indigo-400 transition"
         >
           + Add Transaction
         </button>
+      </div>
+
+      <!-- ⚠️ Error Message -->
+      <div
+        v-if="transactionStore.error"
+        class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded"
+      >
+        {{ transactionStore.error }}
       </div>
 
       <!-- Transaction Form -->
@@ -22,8 +31,7 @@
             <label class="block text-sm font-medium text-gray-600">Type</label>
             <select
               v-model="form.type"
-              @change="filterCategories"
-              class="w-full rounded-md bg-indigo-500/5 text-gray-700 px-3 py-2 outline-indigo-500/10 focus:outline-2 focus:outline-indigo-500"
+              class="w-full rounded-md bg-indigo-50 text-gray-700 px-3 py-2 focus:ring-2 focus:ring-indigo-500"
             >
               <option disabled value="">Select type</option>
               <option value="income">Income</option>
@@ -36,7 +44,7 @@
             <label class="block text-sm font-medium text-gray-600">Category</label>
             <select
               v-model="form.category_id"
-              class="w-full rounded-md bg-indigo-500/5 text-gray-700 px-3 py-2 outline-indigo-500/10 focus:outline-2 focus:outline-indigo-500"
+              class="w-full rounded-md bg-indigo-50 text-gray-700 px-3 py-2 focus:ring-2 focus:ring-indigo-500"
             >
               <option disabled value="">Select category</option>
               <option
@@ -54,7 +62,7 @@
             <label class="block text-sm font-medium text-gray-600">Goal</label>
             <select
               v-model="form.goal_id"
-              class="w-full rounded-md bg-indigo-500/5 text-gray-700 px-3 py-2 outline-indigo-500/10 focus:outline-2 focus:outline-indigo-500"
+              class="w-full rounded-md bg-indigo-50 text-gray-700 px-3 py-2 focus:ring-2 focus:ring-indigo-500"
             >
               <option value="">No Goal</option>
               <option
@@ -62,7 +70,7 @@
                 :key="goal.id"
                 :value="goal.id"
               >
-                {{ goal.name }} — Target ₦{{ goal.target_amount.toLocaleString() }}
+                {{ goal.name }} — ₦{{ goal.target_amount.toLocaleString() }}
               </option>
             </select>
           </div>
@@ -73,7 +81,7 @@
             <input
               type="number"
               v-model="form.amount"
-              class="w-full rounded-md bg-indigo-500/5 px-3 py-2 text-gray-700 outline-indigo-500/10 focus:outline-2 focus:outline-indigo-500"
+              class="w-full rounded-md bg-indigo-50 px-3 py-2 text-gray-700 focus:ring-2 focus:ring-indigo-500"
               placeholder="Enter amount"
             />
           </div>
@@ -83,25 +91,29 @@
             <label class="block text-sm font-medium text-gray-600">Note</label>
             <input
               v-model="form.note"
-              class="w-full rounded-md bg-indigo-500/5 px-3 py-2 text-gray-700 outline-indigo-500/10 focus:outline-2 focus:outline-indigo-500"
+              class="w-full rounded-md bg-indigo-50 px-3 py-2 text-gray-700 focus:ring-2 focus:ring-indigo-500"
               placeholder="Optional note"
             />
           </div>
 
+          <!-- Save Button -->
           <button
             type="submit"
-            class="w-full bg-indigo-500 text-white py-2 rounded-md font-semibold hover:bg-indigo-400 cursor-pointer transition"
+            :disabled="transactionStore.creating"
+            class="w-full bg-indigo-500 text-white py-2 rounded-md font-semibold hover:bg-indigo-400 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Save Transaction
+            <span v-if="transactionStore.creating">Saving...</span>
+            <span v-else>Save Transaction</span>
           </button>
         </form>
       </div>
 
-      <!-- Transactions List -->
+      <!-- Loading Transactions -->
       <div v-if="transactionStore.loading" class="text-center text-gray-400">
         Loading transactions...
       </div>
 
+      <!-- Transactions List -->
       <div
         v-else-if="transactionStore.transactions.length === 0"
         class="bg-white rounded-lg shadow p-6 text-center text-gray-500"
@@ -109,10 +121,7 @@
         No transactions found.
       </div>
 
-      <div
-        v-else
-        class="bg-white rounded-lg shadow divide-y divide-gray-100"
-      >
+      <div v-else class="bg-white rounded-lg shadow divide-y divide-gray-100">
         <div
           v-for="tx in transactionStore.transactions"
           :key="tx.id"
@@ -124,7 +133,7 @@
             </p>
             <p class="text-sm text-gray-500">{{ formatDate(tx.created_at) }}</p>
             <p class="text-xs text-gray-400 capitalize">
-              {{ tx.type }} • {{ tx.category?.name || 'Uncategorized' }}
+              {{ tx.type }} • {{ tx.category?.name || "Uncategorized" }}
               <span v-if="tx.goal">• Goal: {{ tx.goal.name }}</span>
             </p>
           </div>
@@ -132,7 +141,7 @@
             :class="tx.type === 'income' ? 'text-green-600' : 'text-red-500'"
             class="font-bold"
           >
-            {{ tx.type === 'income' ? '+' : '-' }}
+            {{ tx.type === 'income' ? "+" : "-" }}
             ₦{{ Number(tx.amount ?? 0).toLocaleString() }}
           </p>
         </div>
@@ -163,7 +172,7 @@ const filteredCategories = computed(() => {
 
 const createTransaction = async () => {
   if (!form.value.type || !form.value.amount || !form.value.category_id) {
-    alert("Please fill all required fields.");
+    transactionStore.setError("Please fill all required fields.");
     return;
   }
   await transactionStore.addTransaction(form.value);

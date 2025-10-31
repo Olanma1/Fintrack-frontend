@@ -4,6 +4,11 @@
   <div class="min-h-screen bg-gray-50 p-6">
     <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-6">
       <h1 class="text-2xl font-bold text-gray-800 mb-6">🎯 My Goals</h1>
+      
+        <!-- ⚠️ Error message -->
+      <div v-if="errorMessage" class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+        {{ errorMessage }}
+      </div>
 
       <!-- Add Goal Form -->
       <form @submit.prevent="handleAddGoal" class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -88,6 +93,7 @@ import { ref, onMounted } from "vue";
 import { useGoalStore } from "../stores/goals";
 
 const goalStore = useGoalStore();
+const errorMessage = ref("");
 
 const newGoal = ref({
   name: "",
@@ -96,12 +102,20 @@ const newGoal = ref({
 });
 
 const handleAddGoal = async () => {
-  await goalStore.addGoal(newGoal.value);
-  newGoal.value = { name: "", target_amount: "", deadline: "" };
+  try {
+    await goalStore.addGoal(newGoal.value);
+    newGoal.value = { name: "", target_amount: "", deadline: "" };
+  } catch (err) {
+    errorMessage.value = goalStore.error;
+  }
 };
 
 const handleDeleteGoal = async (id) => {
-  await goalStore.deleteGoal(id);
+  try {
+    await goalStore.deleteGoal(id);
+  } catch (err) {
+    errorMessage.value = goalStore.error;
+  }
 };
 
 const computeProgress = (goal) => {
@@ -113,7 +127,8 @@ const computeProgress = (goal) => {
 
 const formatDate = (date) => new Date(date).toLocaleDateString();
 
-onMounted(() => {
-  goalStore.fetchGoals();
+onMounted(async () => {
+  await goalStore.fetchGoals();
+  errorMessage.value = goalStore.error;
 });
 </script>

@@ -4,6 +4,7 @@ import api from "../api/axios";
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     user: null,
+    error: null,
     token: localStorage.getItem("token") || null,
   }),
 
