@@ -35,9 +35,10 @@
       </div>
 
       <div class="md:w-1/2 flex justify-center">
-    <img src="/finance.svg" 
-        alt="Dashboard illustration" 
-        class="w-full max-w-md rounded-2xl shadow-lg" 
+    <img
+      :src="financeIllustration"
+      alt="Finance Illustration"
+      class="w-full max-w-md mb-8"
     />
       </div>
     </section>
@@ -152,6 +153,7 @@
 <script setup>
 import { onMounted } from "vue";
 import { useRouter } from "vue-router";
+import financeIllustration from "@/assets/finance.svg";
 
 const router = useRouter();
 
