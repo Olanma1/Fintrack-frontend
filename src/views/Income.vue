@@ -18,7 +18,6 @@
         <table class="min-w-full">
           <thead class="bg-gray-100 text-gray-600 uppercase text-sm">
             <tr>
-              <th class="px-6 py-3 text-left">Name</th>
               <th class="px-6 py-3 text-left">Category</th>
               <th class="px-6 py-3 text-right">Amount</th>
               <th class="px-6 py-3 text-right">Date</th>
@@ -30,7 +29,6 @@
               :key="transaction.id"
               class="border-t hover:bg-gray-50"
             >
-              <td class="px-6 py-4">{{ transaction.name }}</td>
               <td class="px-6 py-4">{{ transaction.category?.name || '—' }}</td>
               <td class="px-6 py-4 text-right text-green-600">
                 ₦{{ Number(transaction.amount).toLocaleString() }}
