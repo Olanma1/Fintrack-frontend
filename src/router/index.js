@@ -11,8 +11,10 @@ import Insights from "../views/Insights.vue";
 import Goals from "@/views/Goals.vue";
 import Expense from "@/views/Expense.vue";
 import Income from "@/views/Income.vue";
+import LandingPage from "../views/LandingPage.vue";
 
 const routes = [
+  { path: "/", component: LandingPage },
   { path: "/login", component: Login },
   { path: "/register", component: Register },
   { path: "/verify-otp", component: VerifyOtp },
@@ -33,8 +35,15 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const auth = useAuthStore();
-  if (to.meta.requiresAuth && !auth.token) next("/login");
-  else next();
+
+  if (to.meta.requiresAuth && !auth.token) {
+    next("/login");
+  } else if (to.path === "/" && auth.token) {
+    next("/insights"); 
+  } else {
+    next();
+  }
 });
+
 
 export default router;
