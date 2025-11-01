@@ -4,8 +4,9 @@ import api from "../api/axios";
 export const useTransactionStore = defineStore("transactions", {
   state: () => ({
     transactions: [],
-    loading: false, // For global loading state
-    creating: false, // For specific "Add Transaction" loading
+    loading: false,
+    creating: false,
+    updating: false,
     error: null,
   }),
 
@@ -27,10 +28,7 @@ export const useTransactionStore = defineStore("transactions", {
           ? response.data
           : response.data.data || [];
       } catch (err) {
-        console.error("Failed to fetch transactions:", err);
-        this.setError(
-          err.response?.data?.message || "Failed to load transactions"
-        );
+        this.setError(err.response?.data?.message || "Failed to load transactions");
       } finally {
         this.loading = false;
       }
@@ -44,18 +42,34 @@ export const useTransactionStore = defineStore("transactions", {
         const transaction = response.data?.data || response.data;
         if (transaction) {
           transaction.amount = Number(transaction.amount || 0);
-          transaction.created_at =
-            transaction.created_at || new Date().toISOString();
+          transaction.created_at = transaction.created_at || new Date().toISOString();
           this.transactions.unshift(transaction);
         }
       } catch (err) {
-        console.error("Failed to add transaction:", err);
         this.setError(
-          err.response?.data?.message ||
-            "Failed to create transaction. Please try again."
+          err.response?.data?.message || "Failed to create transaction. Please try again."
         );
       } finally {
         this.creating = false;
+      }
+    },
+
+    // ✅ Make sure THIS function is inside the actions block
+    async updateTransaction(id, payload) {
+      this.updating = true;
+      this.error = null;
+      try {
+        const response = await api.put(`/transactions/${id}`, payload);
+        const updated = response.data?.data || response.data;
+
+        const index = this.transactions.findIndex((t) => t.id === id);
+        if (index !== -1) {
+          this.transactions[index] = { ...this.transactions[index], ...updated };
+        }
+      } catch (err) {
+        this.setError(err.response?.data?.message || "Failed to update transaction");
+      } finally {
+        this.updating = false;
       }
     },
 
@@ -66,10 +80,7 @@ export const useTransactionStore = defineStore("transactions", {
         await api.delete(`/transactions/${id}`);
         this.transactions = this.transactions.filter((t) => t.id !== id);
       } catch (err) {
-        console.error("Failed to delete transaction:", err);
-        this.setError(
-          err.response?.data?.message || "Failed to delete transaction"
-        );
+        this.setError(err.response?.data?.message || "Failed to delete transaction");
       } finally {
         this.loading = false;
       }

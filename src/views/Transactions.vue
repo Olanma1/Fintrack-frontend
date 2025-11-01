@@ -3,7 +3,6 @@
     <Navbar />
 
     <main class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <!-- Header -->
       <div class="flex justify-between items-center mb-8">
         <h1 class="text-2xl font-bold text-gray-800">Transactions</h1>
 
@@ -15,7 +14,7 @@
         </button>
       </div>
 
-      <!-- ⚠️ Error Message -->
+      <!-- ⚠️ Error Notification -->
       <div
         v-if="transactionStore.error"
         class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded"
@@ -23,9 +22,9 @@
         {{ transactionStore.error }}
       </div>
 
-      <!-- Transaction Form -->
+      <!-- Create / Edit Form -->
       <div v-if="showForm" class="bg-white rounded-lg shadow p-6 mb-8">
-        <form @submit.prevent="createTransaction" class="space-y-4">
+        <form @submit.prevent="saveTransaction" class="space-y-4">
           <!-- Type -->
           <div>
             <label class="block text-sm font-medium text-gray-600">Type</label>
@@ -47,11 +46,7 @@
               class="w-full rounded-md bg-indigo-50 text-gray-700 px-3 py-2 focus:ring-2 focus:ring-indigo-500"
             >
               <option disabled value="">Select category</option>
-              <option
-                v-for="cat in filteredCategories"
-                :key="cat.id"
-                :value="cat.id"
-              >
+              <option v-for="cat in filteredCategories" :key="cat.id" :value="cat.id">
                 {{ cat.name }}
               </option>
             </select>
@@ -65,11 +60,7 @@
               class="w-full rounded-md bg-indigo-50 text-gray-700 px-3 py-2 focus:ring-2 focus:ring-indigo-500"
             >
               <option value="">No Goal</option>
-              <option
-                v-for="goal in goalStore.goals"
-                :key="goal.id"
-                :value="goal.id"
-              >
+              <option v-for="goal in goalStore.goals" :key="goal.id" :value="goal.id">
                 {{ goal.name }} — ₦{{ goal.target_amount.toLocaleString() }}
               </option>
             </select>
@@ -96,24 +87,26 @@
             />
           </div>
 
-          <!-- Save Button -->
           <button
             type="submit"
-            :disabled="transactionStore.creating"
+            :disabled="transactionStore.creating || transactionStore.updating"
             class="w-full bg-indigo-500 text-white py-2 rounded-md font-semibold hover:bg-indigo-400 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span v-if="transactionStore.creating">Saving...</span>
-            <span v-else>Save Transaction</span>
+            <span v-if="editingTransaction">
+              {{ transactionStore.updating ? "Updating..." : "Update Transaction" }}
+            </span>
+            <span v-else>
+              {{ transactionStore.creating ? "Saving..." : "Save Transaction" }}
+            </span>
           </button>
         </form>
       </div>
 
-      <!-- Loading Transactions -->
+      <!-- Transactions List -->
       <div v-if="transactionStore.loading" class="text-center text-gray-400">
         Loading transactions...
       </div>
 
-      <!-- Transactions List -->
       <div
         v-else-if="transactionStore.transactions.length === 0"
         class="bg-white rounded-lg shadow p-6 text-center text-gray-500"
@@ -137,13 +130,31 @@
               <span v-if="tx.goal">• Goal: {{ tx.goal.name }}</span>
             </p>
           </div>
-          <p
-            :class="tx.type === 'income' ? 'text-green-600' : 'text-red-500'"
-            class="font-bold"
-          >
-            {{ tx.type === 'income' ? "+" : "-" }}
-            ₦{{ Number(tx.amount ?? 0).toLocaleString() }}
-          </p>
+
+          <div class="flex items-center gap-3">
+            <p
+              :class="tx.type === 'income' ? 'text-green-600' : 'text-red-500'"
+              class="font-bold"
+            >
+              {{ tx.type === 'income' ? '+' : '-' }}
+              ₦{{ Number(tx.amount ?? 0).toLocaleString() }}
+            </p>
+
+            <button
+              @click="editTransaction(tx)"
+              class="text-blue-600 hover:text-blue-800 text-sm font-medium"
+            >
+              Edit
+            </button>
+
+            <button
+              @click="transactionStore.deleteTransaction(tx.id)"
+              class="text-red-600 hover:text-red-800 text-sm font-medium"
+              :disabled="transactionStore.loading"
+            >
+              Delete
+            </button>
+          </div>
         </div>
       </div>
     </main>
@@ -162,7 +173,15 @@ const categoryStore = useCategoryStore();
 const goalStore = useGoalStore();
 
 const showForm = ref(false);
-const form = ref({ type: "", category_id: "", goal_id: "", amount: "", note: "" });
+const editingTransaction = ref(null);
+
+const form = ref({
+  type: "",
+  category_id: "",
+  goal_id: "",
+  amount: "",
+  note: "",
+});
 
 const categories = computed(() => categoryStore.categories);
 const filteredCategories = computed(() => {
@@ -171,13 +190,25 @@ const filteredCategories = computed(() => {
 });
 
 const createTransaction = async () => {
-  if (!form.value.type || !form.value.amount || !form.value.category_id) {
-    transactionStore.setError("Please fill all required fields.");
-    return;
-  }
   await transactionStore.addTransaction(form.value);
   await goalStore.fetchGoals();
   form.value = { type: "", category_id: "", goal_id: "", amount: "", note: "" };
+  showForm.value = false;
+};
+
+const editTransaction = (tx) => {
+  editingTransaction.value = tx;
+  form.value = { ...tx };
+  showForm.value = true;
+};
+
+const saveTransaction = async () => {
+  if (editingTransaction.value) {
+    await transactionStore.updateTransaction(editingTransaction.value.id, form.value);
+  } else {
+    await createTransaction();
+  }
+  editingTransaction.value = null;
   showForm.value = false;
 };
 

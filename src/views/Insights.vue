@@ -32,6 +32,36 @@
           />
           <p v-else class="text-gray-400 text-center py-10">No category data yet</p>
         </div>
+
+        <!-- Goals Progress -->
+<div class="bg-white p-6 rounded-lg shadow md:col-span-2">
+  <h2 class="text-lg font-semibold text-gray-700 mb-4">Goals Progress</h2>
+
+  <div v-if="insightStore.goals.length" class="space-y-4">
+    <div
+      v-for="goal in insightStore.goals"
+      :key="goal.name"
+      class="border border-gray-100 rounded-lg p-4"
+    >
+      <div class="flex justify-between mb-2">
+        <h3 class="font-medium text-gray-800">{{ goal.name }}</h3>
+        <span class="text-sm text-gray-600">{{ goal.progress }}%</span>
+      </div>
+      <div class="w-full bg-gray-200 rounded-full h-3">
+        <div
+          class="h-3 rounded-full transition-all duration-500"
+          :class="goal.progress >= 75 ? 'bg-green-500' : 'bg-emerald-700'"
+          :style="{ width: goal.progress + '%' }"
+        ></div>
+      </div>
+    </div>
+  </div>
+
+  <p v-else class="text-gray-400 text-center py-10">
+    No goals available yet
+  </p>
+</div>
+
       </div>
     </main>
   </div>
