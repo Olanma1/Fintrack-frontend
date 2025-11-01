@@ -35,7 +35,7 @@
       </div>
 
       <div class="md:w-1/2 flex justify-center">
-    <img src="/public/finance.svg" 
+    <img src="/finance.svg" 
         alt="Dashboard illustration" 
         class="w-full max-w-md rounded-2xl shadow-lg" 
     />
