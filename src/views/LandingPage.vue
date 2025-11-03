@@ -35,12 +35,12 @@
       </div>
 
       <div class="md:w-1/2 flex justify-center">
-    <img
-      :src="financeIllustration"
-      alt="Finance Illustration"
-      class="w-full max-w-md mb-8"
-    />
-      </div>
+            <img
+            src="https://cdn-icons-png.flaticon.com/128/12255/12255013.png"
+            alt="Finance Illustration"
+            class="w-full max-w-md mb-8"
+            />
+        </div>
     </section>
 
     <!-- Core Values -->
