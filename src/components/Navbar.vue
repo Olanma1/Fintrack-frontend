@@ -136,7 +136,6 @@ const auth = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 
-// Navigation items (no need for 'current' here)
 const navigation = [
   { name: 'Transaction', href: '/transactions' },
   { name: 'Goals', href: '/goals' },
@@ -161,7 +160,6 @@ const logout = async () => {
   }
 }
 
-// Helper function to check if a route is active
 const isActive = (path) => route.path === path
 </script>
 

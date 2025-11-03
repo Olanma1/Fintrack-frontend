@@ -22,12 +22,17 @@ export const useAuthStore = defineStore("auth", {
       window.location.href = "/verify-otp";
     },
 
-    async logout() {
-      await api.post("/logout");
-      this.user = null;
-      this.token = null;
-      localStorage.removeItem("token");
-    },
+  async logout() {
+      try {
+        await api.post("/logout");
+      } catch (error) {
+        // It's fine if the token is already invalid or expired
+      } finally {
+        this.user = null;
+        this.token = null;
+        localStorage.removeItem("token");
+      }
+  },
 
     async fetchUser() {
       const { data } = await api.get("/user");
