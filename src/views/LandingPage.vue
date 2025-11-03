@@ -153,7 +153,6 @@
 <script setup>
 import { onMounted } from "vue";
 import { useRouter } from "vue-router";
-import financeIllustration from "@/assets/finance.svg";
 
 const router = useRouter();
 
