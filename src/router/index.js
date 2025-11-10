@@ -12,6 +12,7 @@ import Insights from "../views/Insights.vue";
 import Goals from "../views/Goals.vue";
 import Expense from "../views/Expense.vue";
 import Income from "../views/Income.vue";
+import BalanceSheet from "../views/BalanceSheet.vue";
 
 const routes = [
   { path: "/", component: LandingPage },
@@ -27,6 +28,8 @@ const routes = [
   { path: "/expenses", component: Expense, meta: { requiresAuth: true } },
   { path: "/income", component: Income, meta: { requiresAuth: true } },
   { path: "/insights", component: Insights, meta: { requiresAuth: true } },
+  { path: "/balance", component: BalanceSheet, meta: { requiresAuth: true } },
+
 ];
 
 const router = createRouter({

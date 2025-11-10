@@ -1,13 +1,11 @@
 <template>
-  <div class="min-h-full">
+  <div :class="[theme.darkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-800', 'min-h-full transition-colors duration-300']">
     <!-- Navbar -->
     <Navbar />
 
     <!-- Header -->
-    <header class="relative bg-gray-800 after:pointer-events-none after:absolute after:inset-x-0 after:inset-y-0 after:border-y after:border-white/10">
-      <!-- <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <h1 class="text-3xl font-bold tracking-tight text-white">Profile</h1>
-      </div> -->
+    <header class="relative" :class="theme.darkMode ? 'bg-gray-800 after:border-white/10' : 'bg-gray-200 after:border-gray-300'">
+      <!-- optional header content -->
     </header>
 
     <!-- Main content -->
@@ -15,7 +13,7 @@
       <div class="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 space-y-6">
         
         <!-- User Info Card -->
-        <div class="bg-gray-800/50 border border-white/10 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 shadow-lg">
+        <div :class="['rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 shadow-lg transition-colors duration-300', theme.darkMode ? 'bg-gray-800/50 border border-white/10' : 'bg-white border border-gray-200']">
           <div class="flex items-center space-x-4">
             <img
               class="size-20 rounded-full outline -outline-offset-1 outline-black/10"
@@ -23,9 +21,9 @@
               alt="User Avatar"
             />
             <div>
-              <h2 class="text-2xl font-semibold text-black">{{ auth.user?.name }}</h2>
-              <p class="text-gray-800">{{ auth.user?.email }}</p>
-              <p class="text-sm text-gray-800 mt-1">
+              <h2 :class="theme.darkMode ? 'text-gray-100' : 'text-black'" class="text-2xl font-semibold">{{ auth.user?.name }}</h2>
+              <p :class="theme.darkMode ? 'text-gray-300' : 'text-gray-800'">{{ auth.user?.email }}</p>
+              <p :class="theme.darkMode ? 'text-gray-400' : 'text-gray-800'" class="text-sm mt-1">
                 Joined on {{ formatDate(auth.user?.created_at) }}
               </p>
             </div>
@@ -47,38 +45,34 @@
         </div>
 
         <!-- Account Details -->
-        <div class="bg-gray-800/50 border border-white/10 rounded-2xl p-6 shadow-md">
-          <h3 class="text-lg font-semibold text-white mb-4">Account Information</h3>
-          <dl class="divide-y divide-white/10">
+        <div :class="['rounded-2xl p-6 shadow-md transition-colors duration-300', theme.darkMode ? 'bg-gray-800/50 border border-white/10' : 'bg-white border border-gray-200']">
+          <h3 :class="theme.darkMode ? 'text-gray-100' : 'text-gray-800'" class="text-lg font-semibold mb-4">Account Information</h3>
+          <dl :class="theme.darkMode ? 'divide-white/10' : 'divide-gray-200'">
             <div class="py-3 grid grid-cols-3 gap-4">
-              <dt class="text-sm font-medium text-gray-800">Full Name</dt>
-              <dd class="col-span-2 text-sm text-gray-800">{{ auth.user?.name }}</dd>
+              <dt :class="theme.darkMode ? 'text-gray-300' : 'text-gray-800'" class="text-sm font-medium">Full Name</dt>
+              <dd :class="theme.darkMode ? 'text-gray-100' : 'text-gray-800'" class="col-span-2 text-sm">{{ auth.user?.name }}</dd>
             </div>
             <div class="py-3 grid grid-cols-3 gap-4">
-              <dt class="text-sm font-medium text-gray-800">Email Address</dt>
-              <dd class="col-span-2 text-sm text-gray-800">{{ auth.user?.email }}</dd>
+              <dt :class="theme.darkMode ? 'text-gray-300' : 'text-gray-800'" class="text-sm font-medium">Email Address</dt>
+              <dd :class="theme.darkMode ? 'text-gray-100' : 'text-gray-800'" class="col-span-2 text-sm">{{ auth.user?.email }}</dd>
             </div>
-            <!-- <div class="py-3 grid grid-cols-3 gap-4">
-              <dt class="text-sm font-medium text-gray-800">Username</dt>
-              <dd class="col-span-2 text-sm text-gray-800">{{ auth.user?.avatar || 'not set' }}</dd>
-            </div> -->
             <div class="py-3 grid grid-cols-3 gap-4">
-              <dt class="text-sm font-medium text-gray-800">Joined</dt>
-              <dd class="col-span-2 text-sm text-gray-800">
+              <dt :class="theme.darkMode ? 'text-gray-300' : 'text-gray-800'" class="text-sm font-medium">Joined</dt>
+              <dd :class="theme.darkMode ? 'text-gray-100' : 'text-gray-800'" class="col-span-2 text-sm">
                 {{ formatDate(auth.user?.created_at) }}
               </dd>
             </div>
           </dl>
         </div>
 
-        <!-- Optional Section: Security Settings -->
-        <div class="bg-gray-800/50 border border-white/10 rounded-2xl p-6 shadow-md">
-          <h3 class="text-lg font-semibold text-gray-800 mb-4">Security</h3>
-          <p class="text-sm text-gray-800 mb-4">
+        <!-- Security Settings -->
+        <div :class="['rounded-2xl p-6 shadow-md transition-colors duration-300', theme.darkMode ? 'bg-gray-800/50 border border-white/10' : 'bg-white border border-gray-200']">
+          <h3 :class="theme.darkMode ? 'text-gray-100' : 'text-gray-800'" class="text-lg font-semibold mb-4">Security</h3>
+          <p :class="theme.darkMode ? 'text-gray-300' : 'text-gray-800'" class="text-sm mb-4">
             Keep your account safe by updating your password regularly.
           </p>
           <button
-            class="rounded-md bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-sm font-medium text-gray-800 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500"
+            class="rounded-md bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-sm font-medium text-white focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500"
           >
             Change Password
           </button>
@@ -92,10 +86,12 @@
 import Navbar from '../components/Navbar.vue'
 import { useAuthStore } from '../stores/auth'
 import { useRouter } from 'vue-router'
+import { useThemeStore } from "../stores/themeStore";
 import { onMounted } from 'vue'
 
 const auth = useAuthStore()
 const router = useRouter()
+const theme = useThemeStore()
 
 const logout = async () => {
   try {

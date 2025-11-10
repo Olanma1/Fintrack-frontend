@@ -4,6 +4,7 @@ import api from "../api/axios";
 export const useTransactionStore = defineStore("transactions", {
   state: () => ({
     transactions: [],
+    summary: { total_income: 0, total_expense: 0, profit: 0 },
     loading: false,
     creating: false,
     updating: false,
@@ -35,43 +36,69 @@ export const useTransactionStore = defineStore("transactions", {
     },
 
     async addTransaction(payload) {
-      this.creating = true;
-      this.error = null;
+  this.creating = true;
+  this.error = null;
+  try {
+    const response = await api.post("/transactions", payload);
+    const data = response.data?.data;
+    const transaction = data?.transaction || data;
+
+    if (transaction) {
+      transaction.amount = Number(transaction.amount || 0);
+      this.transactions.unshift(transaction);
+    }
+
+    // ✅ Only sync goal if present and import works
+    if (data?.goal) {
       try {
-        const response = await api.post("/transactions", payload);
-        const transaction = response.data?.data || response.data;
-        if (transaction) {
-          transaction.amount = Number(transaction.amount || 0);
-          transaction.created_at = transaction.created_at || new Date().toISOString();
-          this.transactions.unshift(transaction);
-        }
-      } catch (err) {
-        this.setError(
-          err.response?.data?.message || "Failed to create transaction. Please try again."
-        );
-      } finally {
-        this.creating = false;
+        const goalStore = useGoalStore();
+        const updatedGoal = data.goal;
+        const idx = goalStore.goals.findIndex((g) => g.id === updatedGoal.id);
+        if (idx !== -1) goalStore.goals[idx] = updatedGoal;
+      } catch (e) {
+        console.warn("Goal store not initialized yet:", e.message);
       }
-    },
+    }
+
+  } catch (err) {
+    this.setError(
+      err.response?.data?.message || "Failed to create transaction"
+    );
+  } finally {
+    this.creating = false;
+  }
+},
+
+
 
     // ✅ Make sure THIS function is inside the actions block
-    async updateTransaction(id, payload) {
+    async updateTransaction(id, payload) 
+    {
       this.updating = true;
       this.error = null;
       try {
         const response = await api.put(`/transactions/${id}`, payload);
-        const updated = response.data?.data || response.data;
+        const data = response.data?.data;
+        const updatedTx = data?.transaction || data;
 
         const index = this.transactions.findIndex((t) => t.id === id);
-        if (index !== -1) {
-          this.transactions[index] = { ...this.transactions[index], ...updated };
+        if (index !== -1) this.transactions[index] = { ...this.transactions[index], ...updatedTx };
+
+        // Sync updated goal
+        if (data?.goal) {
+          const goalStore = useGoalStore();
+          const updatedGoal = data.goal;
+          const idx = goalStore.goals.findIndex(g => g.id === updatedGoal.id);
+          if (idx !== -1) goalStore.goals[idx] = updatedGoal;
         }
-      } catch (err) {
-        this.setError(err.response?.data?.message || "Failed to update transaction");
-      } finally {
-        this.updating = false;
-      }
+
+        } catch (err) {
+          this.setError(err.response?.data?.message || "Failed to update transaction");
+        } finally {
+          this.updating = false;
+        }
     },
+
 
     async deleteTransaction(id) {
       this.loading = true;

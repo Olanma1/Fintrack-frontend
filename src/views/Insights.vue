@@ -1,67 +1,46 @@
 <template>
-  <div class="min-h-full bg-gray-50">
+  <div :class="['min-h-full transition-colors duration-300', theme.darkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-800']">
     <Navbar />
 
     <main class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <h1 class="text-2xl font-bold text-gray-800 mb-6">Insights</h1>
+      <h1 class="text-2xl font-bold mb-6">Insights</h1>
 
       <!-- Loading State -->
-      <div v-if="insightStore.loading" class="text-gray-500 text-center py-12">
+      <div v-if="insightStore.loading" :class="theme.darkMode ? 'text-gray-400 text-center py-12' : 'text-gray-500 text-center py-12'">
         Loading insights...
       </div>
 
       <!-- Chart Section -->
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div v-else class="grid grid-cols-4 md:grid-cols-2 gap-8">
         <!-- Income vs Expense -->
-        <div class="bg-white p-6 rounded-lg shadow">
-          <h2 class="text-lg font-semibold text-gray-700 mb-4">Income vs Expenses</h2>
-          <BarChart
+        <div :class="['p-6 rounded-lg shadow transition-colors duration-300', theme.darkMode ? 'bg-gray-800' : 'bg-white']">
+          <h2 :class="theme.darkMode ? 'text-lg font-semibold mb-4 text-gray-200' : 'text-lg font-semibold mb-4 text-gray-700'">Income vs Expenses</h2>
+
+          <Bar
             v-if="incomeExpenseData.datasets[0].data.some(v => v !== 0)"
-            :chart-data="incomeExpenseData"
+            :data="incomeExpenseData"
+            :options="barOptions"
           />
 
-          <p v-else class="text-gray-400 text-center py-10">No income/expense data yet</p>
+          <p v-else :class="theme.darkMode ? 'text-gray-400 text-center py-10' : 'text-gray-400 text-center py-10'">
+            No income/expense data yet
+          </p>
         </div>
 
         <!-- Spending by Category -->
-        <div class="bg-white p-6 rounded-lg shadow">
-          <h2 class="text-lg font-semibold text-gray-700 mb-4">Spending by Category</h2>
-          <PieChart
-            v-if="categoryData.labels.length"
-            :chart-data="categoryData"
-          />
-          <p v-else class="text-gray-400 text-center py-10">No category data yet</p>
+        <div :class="['p-6 rounded-lg shadow flex flex-col transition-colors duration-300', theme.darkMode ? 'bg-gray-800' : 'bg-white']">
+          <h2 :class="theme.darkMode ? 'text-lg font-semibold mb-4 text-gray-200' : 'text-lg font-semibold mb-4 text-gray-700'">
+            Spending by Category
+          </h2>
+
+          <div class="relative h-64">
+            <Pie
+              v-if="categoryData.labels.length"
+              :data="categoryData"
+              :options="pieOptions"
+            />
+          </div>
         </div>
-
-        <!-- Goals Progress -->
-<div class="bg-white p-6 rounded-lg shadow md:col-span-2">
-  <h2 class="text-lg font-semibold text-gray-700 mb-4">Goals Progress</h2>
-
-  <div v-if="insightStore.goals.length" class="space-y-4">
-    <div
-      v-for="goal in insightStore.goals"
-      :key="goal.name"
-      class="border border-gray-100 rounded-lg p-4"
-    >
-      <div class="flex justify-between mb-2">
-        <h3 class="font-medium text-gray-800">{{ goal.name }}</h3>
-        <span class="text-sm text-gray-600">{{ goal.progress }}%</span>
-      </div>
-      <div class="w-full bg-gray-200 rounded-full h-3">
-        <div
-          class="h-3 rounded-full transition-all duration-500"
-          :class="goal.progress >= 75 ? 'bg-green-500' : 'bg-emerald-700'"
-          :style="{ width: goal.progress + '%' }"
-        ></div>
-      </div>
-    </div>
-  </div>
-
-  <p v-else class="text-gray-400 text-center py-10">
-    No goals available yet
-  </p>
-</div>
-
       </div>
     </main>
   </div>
@@ -70,13 +49,25 @@
 <script setup>
 import Navbar from "../components/Navbar.vue";
 import { computed, onMounted } from "vue";
-import { BarChart, PieChart } from "vue-chart-3";
-import { Chart, registerables } from "chart.js";
 import { useInsightStore } from "../stores/insight";
+import { useThemeStore } from "../stores/themeStore";
+import { Bar, Pie } from "vue-chartjs";
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  ArcElement,
+} from "chart.js";
 
-Chart.register(...registerables);
+// Register chart.js components
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement);
 
 const insightStore = useInsightStore();
+const theme = useThemeStore();
 
 onMounted(async () => {
   await insightStore.fetchInsights();
@@ -89,10 +80,7 @@ const incomeExpenseData = computed(() => ({
       label: "Amount (₦)",
       backgroundColor: ["#4f46e5", "#f43f5e"],
       borderRadius: 6,
-      data: [
-        Number(insightStore.totals.income || 0),
-        Number(insightStore.totals.expense || 0),
-      ],
+      data: [Number(insightStore.totals.income || 0), Number(insightStore.totals.expense || 0)],
     },
   ],
 }));
@@ -101,15 +89,35 @@ const categoryData = computed(() => ({
   labels: insightStore.category_breakdown.map((c) => c.name),
   datasets: [
     {
-      backgroundColor: [
-        "#4f46e5",
-        "#6366f1",
-        "#818cf8",
-        "#a5b4fc",
-        "#c7d2fe",
-      ],
+      backgroundColor: ["#4f46e5", "#6366f1", "#818cf8", "#a5b4fc", "#c7d2fe"],
       data: insightStore.category_breakdown.map((c) => Number(c.total || 0)),
     },
   ],
+}));
+
+// Chart options with dark/light theme adaptation
+const barOptions = computed(() => ({
+  responsive: true,
+  plugins: {
+    legend: {
+      display: true,
+      labels: {
+        color: theme.darkMode ? '#D1D5DB' : '#374151', // text-gray-300 / text-gray-700
+      },
+    },
+  },
+}));
+
+const pieOptions = computed(() => ({
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: "bottom",
+      labels: {
+        color: theme.darkMode ? '#D1D5DB' : '#374151',
+      },
+    },
+  },
 }));
 </script>
