@@ -17,7 +17,7 @@
         theme.darkMode 
           ? 'bg-green-600 hover:bg-green-500 text-white' 
           : 'bg-green-500 hover:bg-green-400 text-white',
-        'rounded-md px-4 py-2 font-medium shadow transition disabled:opacity-50 disabled:cursor-not-allowed'
+        'rounded-md px-4 py-2 cursor-pointer font-medium shadow transition disabled:opacity-50 disabled:cursor-not-allowed'
       ]"
     >
       {{ mono.isLinking ? 'Connecting...' : '🔗 Link Bank Account' }}
