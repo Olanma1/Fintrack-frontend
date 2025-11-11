@@ -3,16 +3,36 @@
     <Navbar />
 
     <main class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center mb-8">
-        <h1 :class="theme.darkMode ? 'text-gray-100' : 'text-gray-800'" class="text-2xl font-bold">Transactions</h1>
+      <div class="flex justify-between items-center mb-8 flex-wrap gap-3">
+  <h1 :class="theme.darkMode ? 'text-gray-100' : 'text-gray-800'" class="text-2xl font-bold">
+    Transactions
+  </h1>
 
-        <button
-          @click="showForm = !showForm"
-          class="rounded-md bg-indigo-500 px-4 py-2 text-white font-medium hover:bg-indigo-400 transition"
-        >
-          + Add Transaction
-        </button>
-      </div>
+  <div class="flex gap-3">
+    <!-- 🔗 Link Bank Account Button -->
+    <button
+      @click="mono.linkAccount"
+      :disabled="mono.isLinking"
+      :class="[
+        theme.darkMode 
+          ? 'bg-green-600 hover:bg-green-500 text-white' 
+          : 'bg-green-500 hover:bg-green-400 text-white',
+        'rounded-md px-4 py-2 font-medium shadow transition disabled:opacity-50 disabled:cursor-not-allowed'
+      ]"
+    >
+      {{ mono.isLinking ? 'Connecting...' : '🔗 Link Bank Account' }}
+    </button>
+
+    <!-- ➕ Add Transaction Button -->
+    <button
+      @click="showForm = !showForm"
+      class="rounded-md bg-indigo-500 px-4 py-2 text-white font-medium hover:bg-indigo-400 transition"
+    >
+      + Add Transaction
+    </button>
+  </div>
+    </div>
+
 
       <!-- Error Notification -->
       <div
@@ -165,7 +185,9 @@ import { useCategoryStore } from "../stores/category";
 import { useGoalStore } from "../stores/goals";
 import { useThemeStore } from "../stores/themeStore";
 import { useToast } from "vue-toastification";
+import { useMonoStore } from "../stores/mono";
 
+const mono = useMonoStore();
 const toast = useToast();
 const transactionStore = useTransactionStore();
 const categoryStore = useCategoryStore();
