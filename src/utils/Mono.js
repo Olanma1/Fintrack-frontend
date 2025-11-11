@@ -4,9 +4,9 @@ export const loadMonoSDK = () =>
     if (window.MonoConnect) return resolve(window.MonoConnect);
 
     // Avoid duplicate script
-    if (!document.querySelector('script[src="https://connect.withmono.com/connect.js"]')) {
+    if (!document.querySelector('script[src="https://api.withmono.com/v2/connect/session"]')) {
       const script = document.createElement("script");
-      script.src = "https://connect.withmono.com/connect.js";
+      script.src = "https://api.withmono.com/v2/connect/session";
       script.async = true;
       script.defer = true;
       script.onerror = () => reject("Failed to load Mono SDK");
