@@ -7,49 +7,44 @@ export const useMonoStore = defineStore("mono", {
   }),
   actions: {
     async linkAccount() {
-  this.isLinking = true;
+      this.isLinking = true;
 
-  // Wait until Mono SDK is available
-  const waitForMono = () =>
-    new Promise((resolve, reject) => {
-      let tries = 0;
-      const check = () => {
-        if (window.MonoConnect) return resolve(window.MonoConnect);
-        tries++;
-        if (tries > 20) return reject("Mono SDK not loaded");
-        setTimeout(check, 250);
-      };
-      check();
-    });
-
-  try {
-    const MonoConnect = await waitForMono();
-
-    const monoConnect = new MonoConnect({
-      key: import.meta.env.VITE_MONO_PUBLIC_KEY,
-      onSuccess: async ({ code }) => {
-        try {
-          await api.post("/mono/exchange", { code });
-          alert("✅ Bank linked successfully!");
-        } catch (error) {
-          console.error(error);
-          alert("❌ Error linking account");
-        } finally {
-          this.isLinking = false;
-        }
-      },
-      onClose: () => {
+      // Wait for Mono script to load
+      if (!window.MonoConnect) {
+        alert("Mono SDK not yet loaded. Please try again in a few seconds.");
         this.isLinking = false;
-      },
-    });
+        return;
+      }
 
-    monoConnect.setup();
-    monoConnect.open();
-  } catch (err) {
-    alert(err);
-    this.isLinking = false;
-  }
-},
+      // Mono vanilla JS config
+      const config = {
+        key: import.meta.env.VITE_MONO_PUBLIC_KEY, // your public key
+        scope: "auth",
+        onSuccess: async function (response) {
+          console.log("Mono success:", response);
+
+          try {
+            // Send the code to your Laravel backend for token exchange
+            await api.post("/mono/exchange", { code: response.code });
+            alert("✅ Bank linked successfully!");
+          } catch (error) {
+            console.error(error);
+            alert("❌ Error linking account");
+          }
+        },
+        onClose: function () {
+          console.log("User closed Mono widget.");
+        },
+      };
+
+      // Create and open widget
+      const connect = new window.MonoConnect(config);
+      connect.setup();
+      connect.open();
+
+      this.isLinking = false;
+    },
+  },
 
     async syncTransactions() {
       this.isSyncing = true;
@@ -65,5 +60,5 @@ export const useMonoStore = defineStore("mono", {
       }
     },
   },
-});
+);
 
