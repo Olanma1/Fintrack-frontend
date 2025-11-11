@@ -4,35 +4,29 @@
 
     <main class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center mb-8 flex-wrap gap-3">
-  <h1 :class="theme.darkMode ? 'text-gray-100' : 'text-gray-800'" class="text-2xl font-bold">
-    Transactions
-  </h1>
+        <h1 :class="theme.darkMode ? 'text-gray-100' : 'text-gray-800'" class="text-2xl font-bold">
+          Transactions
+        </h1>
 
-  <div class="flex gap-3">
-    <!-- 🔗 Link Bank Account Button -->
-    <button
-      @click="mono.linkAccount"
-      :disabled="mono.isLinking"
-      :class="[
-        theme.darkMode 
-          ? 'bg-green-600 hover:bg-green-500 text-white' 
-          : 'bg-green-500 hover:bg-green-400 text-white',
-        'rounded-md px-4 py-2 cursor-pointer font-medium shadow transition disabled:opacity-50 disabled:cursor-not-allowed'
-      ]"
-    >
-      {{ mono.isLinking ? 'Connecting...' : '🔗 Link Bank Account' }}
-    </button>
+        <div class="flex gap-3">
+          <!-- 🔗 Link Bank Account Button -->
+          <button
+            @click="mono.linkAccount"
+            :disabled="mono.isLinking || !monoSdkLoaded"
+          >
+            {{ mono.isLinking ? 'Connecting...' : monoSdkLoaded ? '🔗 Link Bank Account' : 'Loading Mono SDK...' }}
+          </button>
 
-    <!-- ➕ Add Transaction Button -->
-    <button
-      @click="showForm = !showForm"
-      class="rounded-md bg-indigo-500 px-4 py-2 text-white font-medium hover:bg-indigo-400 transition"
-    >
-      + Add Transaction
-    </button>
-  </div>
-    </div>
 
+          <!-- ➕ Add Transaction Button -->
+          <button
+            @click="showForm = !showForm"
+            class="rounded-md bg-indigo-500 px-4 py-2 text-white font-medium hover:bg-indigo-400 transition"
+          >
+            + Add Transaction
+          </button>
+        </div>
+      </div>
 
       <!-- Error Notification -->
       <div
@@ -196,6 +190,7 @@ const theme = useThemeStore();
 
 const showForm = ref(false);
 const editingTransaction = ref(null);
+const monoSdkLoaded = ref(false);
 
 const form = ref({
   type: "",
@@ -206,11 +201,11 @@ const form = ref({
 });
 
 const categories = computed(() => categoryStore.categories);
-const filteredCategories = computed(() => {
-  if (!form.value.type) return [];
-  return categories.value.filter((cat) => cat.type === form.value.type);
-});
+const filteredCategories = computed(() => form.value.type ? categories.value.filter(c => c.type === form.value.type) : []);
 
+const formatDate = (date) => new Date(date).toLocaleDateString();
+
+// Form handlers
 const createTransaction = async () => {
   await transactionStore.addTransaction(form.value);
   await goalStore.fetchGoals();
@@ -233,8 +228,8 @@ const saveTransaction = async () => {
       await createTransaction();
       toast.success("Transaction created successfully");
     }
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     toast.error(transactionStore.error || "Something went wrong while saving the transaction.");
   } finally {
     editingTransaction.value = null;
@@ -242,11 +237,18 @@ const saveTransaction = async () => {
   }
 };
 
-const formatDate = (date) => new Date(date).toLocaleDateString();
-
+// Preload Mono SDK on mount
 onMounted(async () => {
   await categoryStore.fetchCategories();
   await goalStore.fetchGoals();
   await transactionStore.fetchTransactions();
+
+  try {
+    await mono.loadSDK();
+  } catch (err) {
+    console.error("Mono SDK preload failed", err);
+  }
 });
+
+
 </script>

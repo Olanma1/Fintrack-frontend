@@ -1,76 +1,56 @@
+// stores/mono.js
 import { defineStore } from "pinia";
+import { ref } from "vue";
+import { loadMonoSDK } from "../utils/Mono";
 import api from "../api/axios";
+import { useToast } from "vue-toastification";
 
-export const useMonoStore = defineStore("mono", {
-  state: () => ({
-    isLinking: false,
-    isSyncing: false,
-  }),
+export const useMonoStore = defineStore("mono", () => {
+  const isLinking = ref(false);
+  const sdkLoaded = ref(false);
+  const toast = useToast();
 
-  actions: {
-    async waitForMonoSDK() {
-      return new Promise((resolve, reject) => {
-        let attempts = 0;
-        const check = setInterval(() => {
-          attempts++;
-          if (window.MonoConnect) {
-            clearInterval(check);
-            resolve(window.MonoConnect);
+  const loadSDK = async () => {
+    try {
+      await loadMonoSDK();
+      sdkLoaded.value = true;
+    } catch (err) {
+      console.error("Mono SDK load failed", err);
+      throw err;
+    }
+  };
+
+  const linkAccount = async () => {
+    isLinking.value = true;
+    try {
+      await loadSDK();
+
+      if (!window.MonoConnect) throw new Error("MonoConnect not available");
+
+      const widget = new window.MonoConnect({
+        key: import.meta.env.VITE_MONO_PUBLIC_KEY,
+        scope: "auth",
+        onSuccess: async ({ code }) => {
+          try {
+            await api.post("/mono/exchange", { code });
+            toast.success("✅ Bank linked successfully!");
+          } catch (err) {
+            console.error(err);
+            toast.error("❌ Error linking account");
           }
-          if (attempts > 20) { // wait ~4 seconds
-            clearInterval(check);
-            reject("Mono SDK failed to load");
-          }
-        }, 200);
+        },
+        onClose: () => console.log("Mono widget closed"),
       });
-    },
 
-    async linkAccount() {
-      this.isLinking = true;
+      widget.setup();
+      widget.open();
+    } catch (err) {
+      console.error(err);
+      toast.error("Mono SDK failed to load or initialize.");
+    } finally {
+      isLinking.value = false;
+    }
+  };
 
-      try {
-        const MonoConnect = await this.waitForMonoSDK();
-
-        const config = {
-          key: import.meta.env.VITE_MONO_PUBLIC_KEY,
-          scope: "auth",
-          onSuccess: async (response) => {
-            console.log("Mono success:", response);
-            try {
-              await api.post("/mono/exchange", { code: response.code });
-              alert("✅ Bank linked successfully!");
-            } catch (error) {
-              console.error(error);
-              alert("❌ Error linking account");
-            }
-          },
-          onClose: () => {
-            console.log("User closed Mono widget.");
-          },
-        };
-
-        const connect = new MonoConnect(config);
-        connect.setup();
-        connect.open();
-      } catch (err) {
-        alert("Mono SDK not loaded. Please refresh and try again.");
-        console.error(err);
-      } finally {
-        this.isLinking = false;
-      }
-    },
-
-    async syncTransactions() {
-      this.isSyncing = true;
-      try {
-        const { data } = await api.get("/mono/sync");
-        alert(data.message || "✅ Transactions imported successfully!");
-      } catch (error) {
-        console.error(error);
-        alert("❌ Error importing transactions");
-      } finally {
-        this.isSyncing = false;
-      }
-    },
-  },
+  return { isLinking, sdkLoaded, loadSDK, linkAccount };
 });
