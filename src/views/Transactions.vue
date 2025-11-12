@@ -11,11 +11,13 @@
         <div class="flex gap-3">
           <!-- 🔗 Link Bank Account Button -->
           <button
-            @click="mono.linkAccount"
-            :disabled="mono.isLinking || !monoSdkLoaded"
-          >
-            {{ mono.isLinking ? 'Connecting...' : monoSdkLoaded ? '🔗 Link Bank Account' : 'Loading Mono SDK...' }}
+              @click="mono.linkAccount"
+              :disabled="mono.isLinking"
+              class="rounded-md bg-indigo-500 px-4 py-2 text-white font-medium hover:bg-indigo-400 transition"
+            >
+              {{ mono.isLinking ? 'Connecting...' : '🔗 Link Bank Account' }}
           </button>
+
 
 
           <!-- ➕ Add Transaction Button -->
@@ -243,10 +245,16 @@ onMounted(async () => {
   await goalStore.fetchGoals();
   await transactionStore.fetchTransactions();
 
-  try {
-    await mono.loadSDK();
-  } catch (err) {
-    console.error("Mono SDK preload failed", err);
+  const urlParams = new URLSearchParams(window.location.search);
+  const status = urlParams.get("status");
+  const reason = urlParams.get("reason");
+
+  if (status === "linked" && reason === "account_linked") {
+    toast.success("✅ Bank account linked successfully!");
+    // Optionally, trigger transaction sync
+    mono.syncTransactions();
+    // Then remove query params
+    window.history.replaceState({}, document.title, window.location.pathname);
   }
 });
 
