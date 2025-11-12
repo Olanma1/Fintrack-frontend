@@ -6,6 +6,7 @@ export const useMonoStore = defineStore("mono", {
   state: () => ({
     isLinking: false,
     isSyncing: false,
+    monoInstance: null,
   }),
 
   actions: {
@@ -14,16 +15,37 @@ export const useMonoStore = defineStore("mono", {
 
       try {
         const response = await api.post("/mono/initiate");
-        const monoUrl = response.data.mono_url;
+        const { mono_url } = response.data;
 
-        if (!monoUrl) throw new Error("Mono URL not found in response");
+        if (!mono_url) throw new Error("Mono URL not found in response");
 
-        // Save auth token before redirect
+        // Save token before anything else
         const token = localStorage.getItem("token");
         if (token) localStorage.setItem("monoAuthToken", token);
 
-        // ✅ Open Mono in a new tab (no popup)
-        window.open(monoUrl, "_blank");
+        // Load Mono Connect Widget
+        const connect = new MonoConnect({
+          key: "test_pk_s92rc2zibvvdrhqgn8za",
+          onSuccess: async (data) => {
+            console.log("Mono linked successfully:", data);
+            const { code } = data;
+
+            // Send code to backend
+            await api.post("/mono/exchange", { code });
+
+            alert("Your bank account has been successfully linked!");
+            await this.syncTransactions();
+
+            // Close widget
+            connect.close();
+          },
+          onClose: () => {
+            console.log("Mono widget closed");
+          },
+        });
+
+        // Open the widget
+        connect.open();
       } catch (error) {
         console.error("Mono initiate error:", error);
         alert("Failed to start Mono connection");
