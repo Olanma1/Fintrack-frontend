@@ -13,6 +13,7 @@ import Goals from "../views/Goals.vue";
 import Expense from "../views/Expense.vue";
 import Income from "../views/Income.vue";
 import BalanceSheet from "../views/BalanceSheet.vue";
+import MonoCallback from "../views/MonoCallback.vue";
 
 const routes = [
   { path: "/", component: LandingPage },
@@ -29,6 +30,8 @@ const routes = [
   { path: "/income", component: Income, meta: { requiresAuth: true } },
   { path: "/insights", component: Insights, meta: { requiresAuth: true } },
   { path: "/balance", component: BalanceSheet, meta: { requiresAuth: true } },
+  {path: "/mono-callback", component: MonoCallback, meta: { requiresAuth: true },
+  },
 
 ];
 

@@ -28,13 +28,17 @@ export const useMonoStore = defineStore("mono", {
     },
 
     async syncTransactions() {
-      try {
-        const { data } = await api.get("/mono/sync");
-        alert(data.message || "✅ Transactions imported successfully!");
-      } catch (error) {
-        console.error(error);
-        alert("❌ Error importing transactions");
-      }
-    },
+  try {
+    this.isSyncing = true;
+    const response = await api.get("/mono/sync");
+    // update your transaction store
+    transactionStore.setTransactions(response.data.transactions);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    this.isSyncing = false;
+  }
+}
+
   },
 });
