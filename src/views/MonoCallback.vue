@@ -1,12 +1,18 @@
 <template>
-  <div class="min-h-screen flex flex-col items-center justify-center p-6">
+  <div
+    :class="[theme.darkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-800', 'min-h-screen flex flex-col items-center justify-center p-6']"
+  >
     <h1 class="text-2xl font-bold mb-4">Bank Account Linked!</h1>
     <p class="mb-6 text-center">
-      Status: <span class="font-semibold">{{ status }}</span>
-      <br />
+      Your bank account has been successfully connected.<br />
+      Status: <span class="font-semibold">{{ status }}</span><br />
       Reason: <span class="font-semibold">{{ reason }}</span>
     </p>
-    <button @click="goToTransactions" class="bg-indigo-500 hover:bg-indigo-400 text-white px-6 py-2 rounded">
+
+    <button
+      @click="goToTransactions"
+      class="bg-indigo-500 hover:bg-indigo-400 text-white px-6 py-2 rounded font-medium transition"
+    >
       Go to Transactions
     </button>
   </div>
@@ -16,25 +22,25 @@
 import { onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useMonoStore } from "../stores/mono";
+import { useThemeStore } from "../stores/themeStore";
 
 const route = useRoute();
 const router = useRouter();
 const mono = useMonoStore();
+const theme = useThemeStore();
 
-// Capture query params
 const status = route.query.status || "unknown";
 const reason = route.query.reason || "unknown";
 
 onMounted(async () => {
-  const stateToken = route.query.state || localStorage.getItem("monoStateToken");
-
-  if (stateToken) {
-    // Restore auth token for API calls
-    localStorage.setItem("token", stateToken);
-    localStorage.removeItem("monoStateToken");
+  // Restore token that was saved before Mono redirect
+  const savedToken = localStorage.getItem("monoAuthToken");
+  if (savedToken) {
+    localStorage.setItem("token", savedToken);
+    localStorage.removeItem("monoAuthToken");
   }
 
-  // Sync transactions only if account linked
+  // Only sync if user actually linked their account
   if (status === "linked" && reason === "account_linked") {
     try {
       await mono.syncTransactions();
@@ -44,5 +50,7 @@ onMounted(async () => {
   }
 });
 
-const goToTransactions = () => router.push("/transactions");
+const goToTransactions = () => {
+  router.push("/transactions");
+};
 </script>
