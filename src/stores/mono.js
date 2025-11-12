@@ -18,39 +18,12 @@ export const useMonoStore = defineStore("mono", {
 
         if (!monoUrl) throw new Error("Mono URL not found in response");
 
-        // Save the auth token before redirecting
+        // Save auth token before redirect
         const token = localStorage.getItem("token");
         if (token) localStorage.setItem("monoAuthToken", token);
 
-        // ✅ Listen for success message from popup
-        const handleMessage = async (event) => {
-          if (event.origin !== window.location.origin) return;
-
-          if (event.data?.monoStatus === "linked") {
-            // Restore token
-            const savedToken = localStorage.getItem("monoAuthToken");
-            if (savedToken) {
-              localStorage.setItem("token", savedToken);
-              localStorage.removeItem("monoAuthToken");
-            }
-
-            // Sync transactions automatically
-            await this.syncTransactions();
-
-            // Show confirmation in main app
-            const params = new URLSearchParams({
-              status: "linked",
-              reason: "account_linked",
-            });
-            window.history.replaceState({}, "", `?${params.toString()}`);
-
-            // Close popup and remove listener
-            popup.close();
-            window.removeEventListener("message", handleMessage);
-          }
-        };
-
-        window.addEventListener("message", handleMessage);
+        // ✅ Open Mono in a new tab (no popup)
+        window.open(monoUrl, "_blank");
       } catch (error) {
         console.error("Mono initiate error:", error);
         alert("Failed to start Mono connection");

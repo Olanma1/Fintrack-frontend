@@ -21,6 +21,7 @@
 <script setup>
 import { onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import api from "../api/axios";
 import { useMonoStore } from "../stores/mono";
 import { useThemeStore } from "../stores/themeStore";
 
@@ -33,7 +34,7 @@ const status = route.query.status || "unknown";
 const reason = route.query.reason || "unknown";
 
 onMounted(async () => {
-  const code = route.query.code; // ✅ define code first
+  const code = route.query.code;
   const savedToken = localStorage.getItem("monoAuthToken");
 
   if (savedToken) {
@@ -43,17 +44,10 @@ onMounted(async () => {
 
   if (code) {
     try {
-      await api.post("/mono/exchange", { code }); // ✅ exchange code for account id
-      await mono.syncTransactions(); // auto-sync
+      await api.post("/mono/exchange", { code });
+      await mono.syncTransactions();
 
-      // ✅ Tell the opener (main page) that link succeeded
-      if (window.opener) {
-        window.opener.postMessage({ monoStatus: "linked" }, "*");
-        window.close(); // ✅ close popup
-        return;
-      }
-
-      // Fallback: update URL on same page if opened in new tab
+      // ✅ Update the URL to show linked status
       const params = new URLSearchParams({
         status: "linked",
         reason: "account_linked",
@@ -64,7 +58,6 @@ onMounted(async () => {
     }
   }
 });
-
 
 const goToTransactions = () => {
   router.push("/transactions");
