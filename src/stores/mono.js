@@ -22,18 +22,6 @@ export const useMonoStore = defineStore("mono", {
         const token = localStorage.getItem("token");
         if (token) localStorage.setItem("monoAuthToken", token);
 
-        // Open popup
-        const width = 500;
-        const height = 700;
-        const left = window.screenX + (window.innerWidth - width) / 2;
-        const top = window.screenY + (window.innerHeight - height) / 2;
-
-        const popup = window.open(
-          monoUrl,
-          "MonoPopup",
-          `width=${width},height=${height},top=${top},left=${left}`
-        );
-
         // ✅ Listen for success message from popup
         const handleMessage = async (event) => {
           if (event.origin !== window.location.origin) return;
