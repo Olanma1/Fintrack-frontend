@@ -1,12 +1,19 @@
 <template>
-  <div class="min-h-screen flex flex-col items-center justify-center">
-    <h1 class="text-xl font-bold mb-4">Linking Bank Account...</h1>
-    <p class="text-gray-600 mb-6">Please wait while we sync your bank transactions.</p>
+  <div
+    :class="[theme.darkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-800', 'min-h-screen flex flex-col items-center justify-center p-6']"
+  >
+    <h1 class="text-2xl font-bold mb-4">Bank Account Linked!</h1>
+    <p class="mb-6 text-center">
+      Your bank account has been successfully connected.
+      <br />
+      Status: <span class="font-semibold">{{ status }}</span>
+      <br />
+      Reason: <span class="font-semibold">{{ reason }}</span>
+    </p>
 
     <button
-      v-if="finished"
       @click="goToTransactions"
-      class="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-400"
+      class="bg-indigo-500 hover:bg-indigo-400 text-white px-6 py-2 rounded font-medium transition"
     >
       Go to Transactions
     </button>
@@ -14,32 +21,33 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
+import { onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useMonoStore } from "../stores/mono";
+import { useThemeStore } from "../stores/themeStore";
 
+const route = useRoute();
 const router = useRouter();
 const mono = useMonoStore();
-const finished = ref(false);
+const theme = useThemeStore();
 
-const goToTransactions = () => {
-  router.push("/transactions");
-};
+// Capture query params safely
+const status = route.query.status || "unknown";
+const reason = route.query.reason || "unknown";
 
+// On mount, optionally sync transactions from Mono
 onMounted(async () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const status = urlParams.get("status");
-  const reason = urlParams.get("reason");
-
   if (status === "linked" && reason === "account_linked") {
-    // Call your store method to sync bank transactions
     try {
-      await mono.syncTransactions();
-      finished.value = true;
-    } catch (error) {
-      console.error("Failed to sync bank transactions:", error);
-      finished.value = true; // still allow user to proceed
+      await mono.syncTransactions(); // your store action to fetch/sync bank transactions
+    } catch (err) {
+      console.error("Failed to sync bank transactions:", err);
     }
   }
 });
+
+// Button to navigate back to transactions page
+const goToTransactions = () => {
+  router.push("/transactions"); // no query params here
+};
 </script>
