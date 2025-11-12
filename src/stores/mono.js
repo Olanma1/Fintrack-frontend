@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import api from "../api/axios";
-import { useTransactionStore } from "./transaction"; // adjust if your store file has a different name
+import { useTransactionStore } from "./transaction";
 
 export const useMonoStore = defineStore("mono", {
   state: () => ({
@@ -18,13 +18,11 @@ export const useMonoStore = defineStore("mono", {
 
         if (!monoUrl) throw new Error("Mono URL not found in response");
 
-        // Save current user token before redirect
+        // Save the auth token before redirecting
         const token = localStorage.getItem("token");
-        if (token) {
-          localStorage.setItem("monoAuthToken", token);
-        }
+        if (token) localStorage.setItem("monoAuthToken", token);
 
-        // Open Mono in popup instead of full redirect
+        // Open popup
         const width = 500;
         const height = 700;
         const left = window.screenX + (window.innerWidth - width) / 2;
@@ -32,17 +30,39 @@ export const useMonoStore = defineStore("mono", {
 
         const popup = window.open(
           monoUrl,
-          "MonoLink",
+          "MonoPopup",
           `width=${width},height=${height},top=${top},left=${left}`
         );
 
-        // Optionally listen for when popup closes
-        const checkPopup = setInterval(() => {
-          if (popup.closed) {
-            clearInterval(checkPopup);
-            window.location.href = "/mono-callback"; // Return to callback page
+        // ✅ Listen for success message from popup
+        const handleMessage = async (event) => {
+          if (event.origin !== window.location.origin) return;
+
+          if (event.data?.monoStatus === "linked") {
+            // Restore token
+            const savedToken = localStorage.getItem("monoAuthToken");
+            if (savedToken) {
+              localStorage.setItem("token", savedToken);
+              localStorage.removeItem("monoAuthToken");
+            }
+
+            // Sync transactions automatically
+            await this.syncTransactions();
+
+            // Show confirmation in main app
+            const params = new URLSearchParams({
+              status: "linked",
+              reason: "account_linked",
+            });
+            window.history.replaceState({}, "", `?${params.toString()}`);
+
+            // Close popup and remove listener
+            popup.close();
+            window.removeEventListener("message", handleMessage);
           }
-        }, 500);
+        };
+
+        window.addEventListener("message", handleMessage);
       } catch (error) {
         console.error("Mono initiate error:", error);
         alert("Failed to start Mono connection");

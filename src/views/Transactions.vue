@@ -182,6 +182,7 @@ import { useGoalStore } from "../stores/goals";
 import { useThemeStore } from "../stores/themeStore";
 import { useToast } from "vue-toastification";
 import { useMonoStore } from "../stores/mono";
+import { useRoute } from "vue-router";
 
 const mono = useMonoStore();
 const toast = useToast();
@@ -238,12 +239,16 @@ const saveTransaction = async () => {
     showForm.value = false;
   }
 };
-
+const route = useRoute();
 // Preload Mono SDK on mount
 onMounted(async () => {
   await categoryStore.fetchCategories();
   await goalStore.fetchGoals();
   await transactionStore.fetchTransactions();
+  const status = route.query.status;
+  if (status === "linked") {
+    console.log("✅ Bank account linked successfully!");
+  }
 });
 
 

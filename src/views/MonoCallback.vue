@@ -33,19 +33,25 @@ const status = route.query.status || "unknown";
 const reason = route.query.reason || "unknown";
 
 onMounted(async () => {
-  // Restore token that was saved before Mono redirect
   const savedToken = localStorage.getItem("monoAuthToken");
   if (savedToken) {
     localStorage.setItem("token", savedToken);
     localStorage.removeItem("monoAuthToken");
   }
 
-  // Only sync if user actually linked their account
-  if (status === "linked" && reason === "account_linked") {
+  if (code) {
     try {
-      await mono.syncTransactions();
+      await api.post("/mono/exchange", { code }); // ✅ call backend exchange
+      await mono.syncTransactions(); // auto-sync after linking
+
+      // Update UI query params
+      const params = new URLSearchParams({
+        status: "linked",
+        reason: "account_linked",
+      });
+      window.history.replaceState({}, "", `?${params.toString()}`);
     } catch (err) {
-      console.error("Failed to sync bank transactions:", err);
+      console.error("Mono exchange failed:", err);
     }
   }
 });
