@@ -245,17 +245,13 @@ onMounted(async () => {
   await goalStore.fetchGoals();
   await transactionStore.fetchTransactions();
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const status = urlParams.get("status");
-  const reason = urlParams.get("reason");
+  if (route.query.status === 'linked') {
+        // do something (e.g., show success message)
+        console.log("Bank account linked successfully!");
 
-  if (status === "linked" && reason === "account_linked") {
-    toast.success("✅ Bank account linked successfully!");
-    // Optionally, trigger transaction sync
-    mono.syncTransactions();
-    // Then remove query params
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }
+        // Clean up the URL (remove ?status=linked)
+        router.replace({ path: route.path });
+      }
 });
 
 
