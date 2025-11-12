@@ -244,14 +244,6 @@ onMounted(async () => {
   await categoryStore.fetchCategories();
   await goalStore.fetchGoals();
   await transactionStore.fetchTransactions();
-
-  if (route.query.status === 'linked') {
-        // do something (e.g., show success message)
-        console.log("Bank account linked successfully!");
-
-        // Clean up the URL (remove ?status=linked)
-        router.replace({ path: route.path });
-      }
 });
 
 

@@ -16,6 +16,8 @@ export const useMonoStore = defineStore("mono", {
 
         if (!monoUrl) throw new Error("Mono URL not found in response");
 
+        const token = localStorage.getItem("token");
+      localStorage.setItem("monoAuthToken", token);
         // Redirect user to Mono Connect
         window.location.href = monoUrl;
 

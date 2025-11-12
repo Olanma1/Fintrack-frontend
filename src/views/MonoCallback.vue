@@ -37,6 +37,12 @@ const reason = route.query.reason || "unknown";
 
 // On mount, optionally sync transactions from Mono
 onMounted(async () => {
+  const savedToken = localStorage.getItem("monoAuthToken");
+  if (savedToken) {
+    localStorage.setItem("token", savedToken);
+    localStorage.removeItem("monoAuthToken");
+  }
+
   if (status === "linked" && reason === "account_linked") {
     try {
       await mono.syncTransactions(); // your store action to fetch/sync bank transactions
