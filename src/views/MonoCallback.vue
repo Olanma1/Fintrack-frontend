@@ -33,7 +33,9 @@ const status = route.query.status || "unknown";
 const reason = route.query.reason || "unknown";
 
 onMounted(async () => {
+  const code = route.query.code; // ✅ define code first
   const savedToken = localStorage.getItem("monoAuthToken");
+
   if (savedToken) {
     localStorage.setItem("token", savedToken);
     localStorage.removeItem("monoAuthToken");
@@ -41,10 +43,17 @@ onMounted(async () => {
 
   if (code) {
     try {
-      await api.post("/mono/exchange", { code }); // ✅ call backend exchange
-      await mono.syncTransactions(); // auto-sync after linking
+      await api.post("/mono/exchange", { code }); // ✅ exchange code for account id
+      await mono.syncTransactions(); // auto-sync
 
-      // Update UI query params
+      // ✅ Tell the opener (main page) that link succeeded
+      if (window.opener) {
+        window.opener.postMessage({ monoStatus: "linked" }, "*");
+        window.close(); // ✅ close popup
+        return;
+      }
+
+      // Fallback: update URL on same page if opened in new tab
       const params = new URLSearchParams({
         status: "linked",
         reason: "account_linked",
@@ -55,6 +64,7 @@ onMounted(async () => {
     }
   }
 });
+
 
 const goToTransactions = () => {
   router.push("/transactions");
