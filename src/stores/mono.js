@@ -5,6 +5,7 @@ import { useTransactionStore } from "./transaction";
 export const useMonoStore = defineStore("mono", {
   state: () => ({
     isLinking: false,
+    isLinked: false,
     isSyncing: false,
   }),
 
@@ -25,6 +26,7 @@ export const useMonoStore = defineStore("mono", {
       try {
         // Send the code to your backend to exchange for account_id
         await api.post("/mono/exchange", { code });
+        this.isLinked = true;
         await this.syncTransactions();
       } catch (err) {
         console.error("Mono code exchange failed:", err);

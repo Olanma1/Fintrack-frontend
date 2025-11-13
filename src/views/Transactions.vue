@@ -11,12 +11,17 @@
         <div class="flex gap-3 items-center">
           <!-- 🔗 Link Bank Account Button -->
           <button
-  @click="openMonoWidget"
-  :disabled="mono.isLinking"
-  class="bg-indigo-500 hover:bg-indigo-400 text-white px-6 py-2 rounded font-medium transition"
->
-  Link Bank Account
-</button>
+            @click="openMonoWidget"
+            :disabled="mono.isLinking || mono.isLinked"
+            :class="[
+              'px-6 py-2 rounded font-medium transition',
+              mono.isLinked
+                ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                : 'bg-indigo-500 hover:bg-indigo-400 text-white'
+            ]"
+          >
+            {{ mono.isLinked ? 'Bank Account Linked ✓' : (mono.isLinking ? 'Linking...' : 'Link Bank Account') }}
+          </button>
 
 
           <p v-if="mono.isSyncing" class="mt-1 text-gray-500 text-sm">Syncing transactions...</p>
@@ -154,7 +159,7 @@ import { useGoalStore } from "../stores/goals";
 import { useThemeStore } from "../stores/themeStore";
 import { useToast } from "vue-toastification";
 import { useMonoStore } from "../stores/mono";
-import Connect from "@mono.co/connect.js";
+import api from "../api/axios";
 
 
 const transactionStore = useTransactionStore();
@@ -224,8 +229,6 @@ const saveTransaction = async () => {
   }
 };
 
-const monoWidget = ref(null);
-
 // Function to open Mono Connect widget
 const openMonoWidget = () => {
   if (!monoPublicKey) {
@@ -269,8 +272,11 @@ const openMonoWidget = () => {
 // On mounted: fetch initial data
 onMounted(async () => {
   await categoryStore.fetchCategories();
-  await goalStore.fetchGoals();
+  // await goalStore.fetchGoals();
   await transactionStore.fetchTransactions();
-
+  const response = await api.get("/user");
+  if (response.data?.mono_account_id) {
+    mono.isLinked = true;
+  }
 });
 </script>
