@@ -8,21 +8,22 @@
           Transactions
         </h1>
 
-        <div class="flex gap-3">
+        <div class="flex gap-3 items-center">
           <!-- 🔗 Link Bank Account Button -->
           <button
-              @click="mono.linkAccount"
-              :disabled="mono.isLinking"
-              class="rounded-md bg-indigo-500 px-4 py-2 text-white font-medium hover:bg-indigo-400 transition"
-            >
-              {{ mono.isLinking ? 'Connecting...' : '🔗 Link Bank Account' }}
-          </button>
+  @click="openMonoWidget"
+  :disabled="mono.isLinking"
+  class="bg-indigo-500 hover:bg-indigo-400 text-white px-6 py-2 rounded font-medium transition"
+>
+  Link Bank Account
+</button>
 
 
+          <p v-if="mono.isSyncing" class="mt-1 text-gray-500 text-sm">Syncing transactions...</p>
 
           <!-- ➕ Add Transaction Button -->
           <button
-            @click="showForm = !showForm"
+            @click="toggleForm"
             class="rounded-md bg-indigo-500 px-4 py-2 text-white font-medium hover:bg-indigo-400 transition"
           >
             + Add Transaction
@@ -38,8 +39,11 @@
         {{ transactionStore.error }}
       </div>
 
-      <!-- Create / Edit Form -->
-      <div v-if="showForm" :class="[theme.darkMode ? 'bg-gray-800 border border-white/10 text-gray-100' : 'bg-white border border-gray-200 text-gray-800', 'rounded-lg shadow p-6 mb-8 transition-colors duration-300']">
+      <!-- Transaction Form -->
+      <div
+        v-if="showForm"
+        :class="[theme.darkMode ? 'bg-gray-800 border border-white/10 text-gray-100' : 'bg-white border border-gray-200 text-gray-800', 'rounded-lg shadow p-6 mb-8 transition-colors duration-300']"
+      >
         <form @submit.prevent="saveTransaction" class="space-y-4">
           <!-- Type -->
           <div>
@@ -62,23 +66,7 @@
               :class="[theme.darkMode ? 'bg-gray-700 text-gray-100 focus:ring-indigo-400' : 'bg-indigo-50 text-gray-700 focus:ring-indigo-500', 'w-full rounded-md px-3 py-2 focus:ring-2']"
             >
               <option disabled value="">Select category</option>
-              <option v-for="cat in filteredCategories" :key="cat.id" :value="cat.id">
-                {{ cat.name }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Tax -->
-          <div>
-            <label :class="theme.darkMode ? 'text-gray-200' : 'text-gray-600'" class="block text-sm font-medium">Tax (Optional)</label>
-            <select
-              v-model="form.tax_id"
-              :class="[theme.darkMode ? 'bg-gray-700 text-gray-100 focus:ring-indigo-400' : 'bg-indigo-50 text-gray-700 focus:ring-indigo-500', 'w-full rounded-md px-3 py-2 focus:ring-2']"
-            >
-              <option value="">No Tax</option>
-              <option v-for="tax in taxes" :key="tax.id" :value="tax.id">
-                {{ tax.name }} — {{ tax.rate }}%
-              </option>
+              <option v-for="cat in filteredCategories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
             </select>
           </div>
 
@@ -97,6 +85,7 @@
           <div>
             <label :class="theme.darkMode ? 'text-gray-200' : 'text-gray-600'" class="block text-sm font-medium">Note</label>
             <input
+              type="text"
               v-model="form.note"
               :class="[theme.darkMode ? 'bg-gray-700 text-gray-100 focus:ring-indigo-400' : 'bg-indigo-50 text-gray-700 focus:ring-indigo-500', 'w-full rounded-md px-3 py-2 focus:ring-2']"
               placeholder="Optional note"
@@ -108,34 +97,24 @@
             :disabled="transactionStore.creating || transactionStore.updating"
             class="w-full bg-indigo-500 text-white py-2 rounded-md font-semibold hover:bg-indigo-400 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span v-if="editingTransaction">
-              {{ transactionStore.updating ? "Updating..." : "Update Transaction" }}
-            </span>
-            <span v-else>
-              {{ transactionStore.creating ? "Saving..." : "Save Transaction" }}
-            </span>
+            {{ editingTransaction ? (transactionStore.updating ? "Updating..." : "Update Transaction") : (transactionStore.creating ? "Saving..." : "Save Transaction") }}
           </button>
         </form>
       </div>
 
       <!-- Transactions List -->
-      <div v-if="transactionStore.loading" :class="theme.darkMode ? 'text-gray-400' : 'text-gray-500'" class="text-center">
+      <div v-if="transactionStore.loading" class="text-center text-gray-500">
         Loading transactions...
       </div>
 
-      <div
-        v-else-if="transactionStore.transactions.length === 0"
-        :class="[theme.darkMode ? 'bg-gray-800 text-gray-300 border border-white/10' : 'bg-white text-gray-500 border border-gray-200', 'rounded-lg shadow p-6 text-center transition-colors duration-300']"
-      >
+      <div v-else-if="transactionStore.transactions.length === 0" 
+           :class="[theme.darkMode ? 'bg-gray-800 text-gray-300 border border-white/10' : 'bg-white text-gray-500 border border-gray-200', 'rounded-lg shadow p-6 text-center transition-colors duration-300']">
         No transactions found.
       </div>
 
       <div v-else :class="[theme.darkMode ? 'bg-gray-800 text-gray-100 divide-white/10' : 'bg-white text-gray-800 divide-gray-100', 'rounded-lg shadow transition-colors duration-300']">
-        <div
-          v-for="tx in transactionStore.transactions"
-          :key="tx.id"
-          :class="[theme.darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50', 'p-4 flex justify-between items-center transition']"
-        >
+        <div v-for="tx in transactionStore.transactions" :key="tx.id"
+             :class="[theme.darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50', 'p-4 flex justify-between items-center transition']">
           <div>
             <p :class="theme.darkMode ? 'text-gray-100 font-semibold' : 'text-gray-800 font-semibold'">
               {{ tx.note || tx.category?.name || tx.type }}
@@ -148,22 +127,15 @@
           </div>
 
           <div class="flex items-center gap-3">
-            <p
-              :class="tx.type === 'income' ? 'text-green-500 font-bold' : 'text-red-500 font-bold'"
-            >
-              {{ tx.type === 'income' ? '+' : '-' }}
-              ₦{{ Number(tx.amount ?? 0).toLocaleString() }}
+            <p :class="tx.type === 'income' ? 'text-green-500 font-bold' : 'text-red-500 font-bold'">
+              {{ tx.type === 'income' ? '+' : '-' }} ₦{{ Number(tx.amount ?? 0).toLocaleString() }}
             </p>
-
             <button :class="[theme.darkMode ? 'text-blue-400 hover:text-blue-200' : 'text-blue-600 hover:text-blue-800', 'text-sm font-medium']" @click="editTransaction(tx)">
               Edit
             </button>
-
-            <button
-              :class="[theme.darkMode ? 'text-red-400 hover:text-red-200' : 'text-red-600 hover:text-red-800', 'text-sm font-medium']"
-              @click="transactionStore.deleteTransaction(tx.id)"
-              :disabled="transactionStore.loading"
-            >
+            <button :class="[theme.darkMode ? 'text-red-400 hover:text-red-200' : 'text-red-600 hover:text-red-800', 'text-sm font-medium']"
+                    @click="transactionStore.deleteTransaction(tx.id)"
+                    :disabled="transactionStore.loading">
               Delete
             </button>
           </div>
@@ -182,14 +154,15 @@ import { useGoalStore } from "../stores/goals";
 import { useThemeStore } from "../stores/themeStore";
 import { useToast } from "vue-toastification";
 import { useMonoStore } from "../stores/mono";
-import { useRoute } from "vue-router";
+import Connect from "@mono.co/connect.js";
 
-const mono = useMonoStore();
-const toast = useToast();
+
 const transactionStore = useTransactionStore();
 const categoryStore = useCategoryStore();
 const goalStore = useGoalStore();
 const theme = useThemeStore();
+const toast = useToast();
+const mono = useMonoStore();
 
 const showForm = ref(false);
 const editingTransaction = ref(null);
@@ -203,23 +176,34 @@ const form = ref({
   note: "",
 });
 
-const categories = computed(() => categoryStore.categories);
-const filteredCategories = computed(() => form.value.type ? categories.value.filter(c => c.type === form.value.type) : []);
+const redirectUrl = import.meta.env.VITE_BASE_URL + "/mono-callback";
+const monoPublicKey = import.meta.env.VITE_MONO_PUBLIC_KEY;
 
-const formatDate = (date) => new Date(date).toLocaleDateString();
+// Computed filtered categories
+const filteredCategories = computed(() =>
+  form.value.type ? categoryStore.categories.filter(c => c.type === form.value.type) : []
+);
+
+const formatDate = date => new Date(date).toLocaleDateString();
+
+// Toggle form
+const toggleForm = () => {
+  showForm.value = !showForm.value;
+  editingTransaction.value = null;
+};
 
 // Form handlers
+const editTransaction = tx => {
+  editingTransaction.value = tx;
+  form.value = { ...tx };
+  showForm.value = true;
+};
+
 const createTransaction = async () => {
   await transactionStore.addTransaction(form.value);
   await goalStore.fetchGoals();
   form.value = { type: "", category_id: "", goal_id: "", amount: "", note: "" };
   showForm.value = false;
-};
-
-const editTransaction = (tx) => {
-  editingTransaction.value = tx;
-  form.value = { ...tx };
-  showForm.value = true;
 };
 
 const saveTransaction = async () => {
@@ -239,17 +223,54 @@ const saveTransaction = async () => {
     showForm.value = false;
   }
 };
-const route = useRoute();
-// Preload Mono SDK on mount
+
+const monoWidget = ref(null);
+
+// Function to open Mono Connect widget
+const openMonoWidget = () => {
+  if (!monoPublicKey) {
+    console.error("Mono public key is missing!");
+    return;
+  }
+
+  // Make sure the SDK is loaded
+  if (typeof window.Connect === "undefined") {
+    alert("Mono SDK failed to load. Check your internet connection or try again.");
+    return;
+  }
+
+  try {
+    const connect = new window.Connect({
+      key: monoPublicKey,
+      onClose: () => {
+        console.log("Mono widget closed");
+      },
+      onSuccess: async (data) => {
+        console.log("Mono success data:", data);
+        await mono.exchangeCode(data.code);
+      },
+      onLoad: () => {
+        console.log("Mono widget loaded");
+      },
+      onEvent: (eventName, data) => {
+        console.log("Mono event:", eventName, data);
+      },
+    });
+
+    connect.setup();
+    connect.open();
+  } catch (error) {
+    console.error("Failed to open Mono widget:", error);
+  }
+};
+
+
+
+// On mounted: fetch initial data
 onMounted(async () => {
   await categoryStore.fetchCategories();
   await goalStore.fetchGoals();
   await transactionStore.fetchTransactions();
-  const status = route.query.status;
-  if (status === "linked") {
-    console.log("✅ Bank account linked successfully!");
-  }
+
 });
-
-
 </script>

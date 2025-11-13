@@ -112,5 +112,21 @@ export const useTransactionStore = defineStore("transactions", {
         this.loading = false;
       }
     },
+
+    async setTransactions() {
+    this.loading = true;
+      this.error = null;
+      try {
+        const response = await api.get("/mono/transactions");
+        this.transactions = Array.isArray(response.data)
+          ? response.data
+          : response.data.data || [];
+      } catch (err) {
+        this.setError(err.response?.data?.message || "Failed to load transactions");
+      } finally {
+        this.loading = false;
+      }
+  }
+
   },
 });
