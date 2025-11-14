@@ -146,6 +146,33 @@
           </div>
         </div>
       </div>
+
+      <!-- Pagination Controls -->
+<div
+  v-if="transactionStore.pagination.last_page > 1"
+  class="flex justify-center items-center gap-3 mt-6"
+>
+  <button
+    @click="changePage(transactionStore.pagination.current_page - 1)"
+    :disabled="transactionStore.pagination.current_page === 1"
+    class="px-4 py-2 cursor-pointer rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    Previous
+  </button>
+
+  <span class="text-sm font-medium">
+    Page {{ transactionStore.pagination.current_page }} of {{ transactionStore.pagination.last_page }}
+  </span>
+
+  <button
+    @click="changePage(transactionStore.pagination.current_page + 1)"
+    :disabled="transactionStore.pagination.current_page === transactionStore.pagination.last_page"
+    class="px-4 py-2 cursor-pointer rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    Next
+  </button>
+</div>
+
     </main>
   </div>
 </template>
@@ -180,6 +207,10 @@ const form = ref({
   amount: "",
   note: "",
 });
+
+const changePage = async (page) => {
+  await transactionStore.fetchTransactions(page);
+};
 
 const redirectUrl = import.meta.env.VITE_BASE_URL + "/mono-callback";
 const monoPublicKey = import.meta.env.VITE_MONO_PUBLIC_KEY;

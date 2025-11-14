@@ -9,6 +9,11 @@ export const useTransactionStore = defineStore("transactions", {
     creating: false,
     updating: false,
     error: null,
+    pagination: {
+      current_page: 1,
+      last_page: 1,
+      total: 0,
+  },
   }),
 
   actions: {
@@ -20,21 +25,34 @@ export const useTransactionStore = defineStore("transactions", {
       }, 5000);
     },
 
-    async fetchTransactions() {
+    async fetchTransactions(page = 1) {
       this.loading = true;
       this.error = null;
       try {
-        const response = await api.get("/transactions");
-        this.transactions = Array.isArray(response.data)
-          ? response.data
-          : response.data.data || [];
-      } catch (err) {
-        this.setError(err.response?.data?.message || "Failed to load transactions");
+        const response = await api.get(`/transactions?page=${page}`);
+        this.transactions = response.data.data;
+        this.pagination = {
+          current_page: response.data.current_page,
+          last_page: response.data.last_page,
+          total: response.data.total,
+        };
+      } catch (error) {
+        console.error(error);
+        this.error = "Failed to load transactions.";
       } finally {
         this.loading = false;
       }
     },
 
+    async deleteTransaction(id) {
+      try {
+        await api.delete(`/transactions/${id}`);
+        await this.fetchTransactions(this.pagination.current_page);
+      } catch (error) {
+        console.error(error);
+      }
+    },
+  },
     async addTransaction(payload) {
   this.creating = true;
   this.error = null;
@@ -100,18 +118,18 @@ export const useTransactionStore = defineStore("transactions", {
     },
 
 
-    async deleteTransaction(id) {
-      this.loading = true;
-      this.error = null;
-      try {
-        await api.delete(`/transactions/${id}`);
-        this.transactions = this.transactions.filter((t) => t.id !== id);
-      } catch (err) {
-        this.setError(err.response?.data?.message || "Failed to delete transaction");
-      } finally {
-        this.loading = false;
-      }
-    },
+    // async deleteTransaction(id) {
+    //   this.loading = true;
+    //   this.error = null;
+    //   try {
+    //     await api.delete(`/transactions/${id}`);
+    //     this.transactions = this.transactions.filter((t) => t.id !== id);
+    //   } catch (err) {
+    //     this.setError(err.response?.data?.message || "Failed to delete transaction");
+    //   } finally {
+    //     this.loading = false;
+    //   }
+    // },
 
     async setTransactions() {
     this.loading = true;
@@ -129,4 +147,4 @@ export const useTransactionStore = defineStore("transactions", {
   }
 
   },
-});
+);
