@@ -23,6 +23,14 @@
             {{ mono.isLinked ? 'Bank Account Linked ✓' : (mono.isLinking ? 'Linking...' : 'Link Bank Account') }}
           </button>
 
+          <!-- 🔓 Unlink Bank Account Button -->
+            <button
+              v-if="mono.isLinked"
+              @click="unlinkBank"
+              class="px-6 py-2 rounded bg-red-500 text-white hover:bg-red-400 transition"
+            >
+              Unlink Bank
+            </button>
 
           <p v-if="mono.isSyncing" class="mt-1 text-gray-500 text-sm">Syncing transactions...</p>
 
@@ -298,6 +306,16 @@ const openMonoWidget = () => {
   }
 };
 
+const unlinkBank = async () => {
+  if (!confirm("Are you sure you want to unlink your bank account?")) return;
+
+  try {
+    await mono.unlinkAccount();
+    toast.success("Bank account unlinked successfully");
+  } catch (e) {
+    toast.error("Failed to unlink account");
+  }
+};
 
 
 // On mounted: fetch initial data
@@ -309,5 +327,12 @@ onMounted(async () => {
   if (response.data?.mono_account_id) {
     mono.isLinked = true;
   }
+
+  if (response.data?.mono_account_id) {
+  mono.isLinked = true;
+  } else {
+    mono.isLinked = false;
+  }
+
 });
 </script>

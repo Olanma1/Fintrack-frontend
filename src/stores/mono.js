@@ -45,6 +45,21 @@ export const useMonoStore = defineStore("mono", {
         this.isSyncing = false;
       }
     },
-  
+
+    async unlinkAccount() {
+      try {
+        const res = await api.post("/mono/unlink");
+        this.isLinked = false;
+
+        const transactionStore = useTransactionStore();
+        transactionStore.transactions = [];
+
+        return res.data;
+      } catch (err) {
+        console.error("Unlink error:", err);
+        throw err;
+      }
+    },
   },
+  
 });
