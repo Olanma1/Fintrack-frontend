@@ -9,28 +9,19 @@
         </h1>
 
         <div class="flex gap-3 items-center">
-          <!-- 🔗 Link Bank Account Button -->
+        <!-- 🔗 / 🔓 Toggle Bank Account Button -->
           <button
-            @click="openMonoWidget"
-            :disabled="mono.isLinking || mono.isLinked"
+            @click="mono.isLinked ? showUnlinkModal = true : openMonoWidget()"
+            :disabled="mono.isLinking"
             :class="[
               'px-6 py-2 rounded font-medium transition',
               mono.isLinked
-                ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                ? 'bg-red-500 hover:bg-red-400 text-white'
                 : 'bg-indigo-500 hover:bg-indigo-400 text-white'
             ]"
           >
-            {{ mono.isLinked ? 'Bank Account Linked ✓' : (mono.isLinking ? 'Linking...' : 'Link Bank Account') }}
+            {{ mono.isLinked ? 'Unlink Bank Account' : (mono.isLinking ? 'Linking...' : 'Link Bank Account') }}
           </button>
-
-          <!-- 🔓 Unlink Bank Account Button -->
-            <button
-              v-if="mono.isLinked"
-              @click="unlinkBank"
-              class="px-6 py-2 rounded bg-red-500 text-white hover:bg-red-400 transition"
-            >
-              Unlink Bank
-            </button>
 
           <p v-if="mono.isSyncing" class="mt-1 text-gray-500 text-sm">Syncing transactions...</p>
 
@@ -181,6 +172,45 @@
   </button>
 </div>
 
+<!-- Unlink Confirmation Modal -->
+<div
+  v-if="showUnlinkModal"
+  class="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50"
+>
+  <div
+    :class="[
+      theme.darkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-800',
+      'w-80 rounded-xl shadow-lg p-6'
+    ]"
+  >
+    <h2 class="text-lg font-semibold">Unlink Bank Account?</h2>
+
+    <p class="text-sm mt-2"
+       :class="theme.darkMode ? 'text-gray-300' : 'text-gray-600'">
+      This will disconnect your bank account from FinTrack. Are you sure you want to continue?
+    </p>
+
+    <div class="flex justify-end gap-3 mt-6">
+      <button
+        @click="showUnlinkModal = false"
+        :class="[
+          theme.darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300',
+          'px-4 py-2 rounded-md transition'
+        ]"
+      >
+        Cancel
+      </button>
+
+      <button
+        @click="unlinkBank"
+        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+      >
+        Yes, Unlink
+      </button>
+    </div>
+  </div>
+</div>
+
     </main>
   </div>
 </template>
@@ -206,7 +236,7 @@ const mono = useMonoStore();
 
 const showForm = ref(false);
 const editingTransaction = ref(null);
-const monoSdkLoaded = ref(false);
+const showUnlinkModal = ref(false);
 
 const form = ref({
   type: "",
@@ -307,32 +337,32 @@ const openMonoWidget = () => {
 };
 
 const unlinkBank = async () => {
-  if (!confirm("Are you sure you want to unlink your bank account?")) return;
-
   try {
     await mono.unlinkAccount();
     toast.success("Bank account unlinked successfully");
+    showUnlinkModal.value = false;
   } catch (e) {
     toast.error("Failed to unlink account");
   }
 };
 
 
+
 // On mounted: fetch initial data
 onMounted(async () => {
   await categoryStore.fetchCategories();
-  // await goalStore.fetchGoals();
   await transactionStore.fetchTransactions();
-  const response = await api.get("/user");
-  if (response.data?.mono_account_id) {
-    mono.isLinked = true;
-  }
 
-  if (response.data?.mono_account_id) {
-  mono.isLinked = true;
-  } else {
-    mono.isLinked = false;
-  }
+  try {
+    const response = await api.get("/user");
 
+    mono.isLinked = !!response.data.mono_account_id;
+
+    console.log("Mono Linked:", mono.isLinked);
+  } catch (e) {
+    console.error("Failed to load user data", e);
+  }
 });
+
+
 </script>
