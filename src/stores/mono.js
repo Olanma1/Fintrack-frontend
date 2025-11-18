@@ -10,35 +10,35 @@ export const useMonoStore = defineStore("mono", {
   }),
 
   actions: {
-    async linkAccount() {
-      this.isLinking = true;
+    async exchangeCode(code) {
+      const transactionStore = useTransactionStore();
+
       try {
-        // No popup or window handling needed, vue-mono handles this
-        console.log("Ready to open Mono widget");
+        this.isLinking = true;
+
+        await api.post("/mono/exchange", { code });
+        this.isLinked = true;
+
+        // ⤵ Immediately update transactions on the UI
+        await transactionStore.fetchTransactions();
+        await this.syncTransactions(); // also refresh after sync
       } catch (err) {
-        console.error("Mono initiate error:", err);
+        console.error("Mono code exchange failed:", err);
       } finally {
         this.isLinking = false;
       }
     },
 
-    async exchangeCode(code) {
-      try {
-        // Send the code to your backend to exchange for account_id
-        await api.post("/mono/exchange", { code });
-        this.isLinked = true;
-        await this.syncTransactions();
-      } catch (err) {
-        console.error("Mono code exchange failed:", err);
-      }
-    },
-
     async syncTransactions() {
+      const transactionStore = useTransactionStore();
+
       try {
         this.isSyncing = true;
-        const transactionStore = useTransactionStore();
-        const response = await api.get("/mono/sync");
-        transactionStore.setTransactions(response.data.transactions);
+
+        await api.get("/mono/sync");
+
+        // ⤵ After syncing on backend, re-fetch list
+        await transactionStore.fetchTransactions();
       } catch (err) {
         console.error("Failed to sync transactions:", err);
       } finally {
@@ -47,19 +47,21 @@ export const useMonoStore = defineStore("mono", {
     },
 
     async unlinkAccount() {
+      const transactionStore = useTransactionStore();
+
       try {
-        const res = await api.post("/mono/unlink");
+        await api.post("/mono/unlink");
+
         this.isLinked = false;
 
-        const transactionStore = useTransactionStore();
         transactionStore.transactions = [];
 
-        return res.data;
+        // ⤵ Ensure UI refreshes properly
+        await transactionStore.fetchTransactions();
       } catch (err) {
         console.error("Unlink error:", err);
         throw err;
       }
     },
   },
-  
 });

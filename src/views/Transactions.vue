@@ -300,52 +300,33 @@ const saveTransaction = async () => {
 
 // Function to open Mono Connect widget
 const openMonoWidget = () => {
-  if (!monoPublicKey) {
-    console.error("Mono public key is missing!");
-    return;
-  }
+  const connect = new window.Connect({
+    key: monoPublicKey,
 
-  // Make sure the SDK is loaded
-  if (typeof window.Connect === "undefined") {
-    alert("Mono SDK failed to load. Check your internet connection or try again.");
-    return;
-  }
+    onSuccess: async (data) => {
+      await mono.exchangeCode(data.code);
 
-  try {
-    const connect = new window.Connect({
-      key: monoPublicKey,
-      onClose: () => {
-        console.log("Mono widget closed");
-      },
-      onSuccess: async (data) => {
-        console.log("Mono success data:", data);
-        await mono.exchangeCode(data.code);
-      },
-      onLoad: () => {
-        console.log("Mono widget loaded");
-      },
-      onEvent: (eventName, data) => {
-        console.log("Mono event:", eventName, data);
-      },
-    });
+      // ⤵ Ensure UI updates immediately
+      await transactionStore.fetchTransactions();
 
-    connect.setup();
-    connect.open();
-  } catch (error) {
-    console.error("Failed to open Mono widget:", error);
-  }
+      toast.success("Bank linked & transactions updated!");
+    },
+  });
+
+  connect.setup();
+  connect.open();
 };
 
 const unlinkBank = async () => {
   try {
     await mono.unlinkAccount();
-    toast.success("Bank account unlinked successfully");
+    await transactionStore.fetchTransactions();
+    toast.success("Bank account unlinked");
     showUnlinkModal.value = false;
   } catch (e) {
     toast.error("Failed to unlink account");
   }
 };
-
 
 
 // On mounted: fetch initial data
@@ -355,14 +336,12 @@ onMounted(async () => {
 
   try {
     const response = await api.get("/user");
-
     mono.isLinked = !!response.data.mono_account_id;
-
-    console.log("Mono Linked:", mono.isLinked);
   } catch (e) {
-    console.error("Failed to load user data", e);
+    console.error("Unable to load user data", e);
   }
 });
+
 
 
 </script>
