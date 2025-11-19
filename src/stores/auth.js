@@ -43,5 +43,24 @@ export const useAuthStore = defineStore("auth", {
       const { data } = await api.get("/user");
       this.user = data;
     },
+
+    async updateProfile(formData) {
+    try {
+      const { data } = await api.post("/user/update", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
+
+      // Update the local user object immediately
+      this.user = data.user;
+
+      return data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
   },
 });

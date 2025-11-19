@@ -106,13 +106,13 @@
                       : 'bg-white text-gray-800 border border-gray-200'
                   ]"
                 >
+                  <!-- Filtered to avoid v-if issues -->
                   <MenuItem
-                    v-for="item in userNavigation"
+                    v-for="item in userNavigation.filter(i => i.name !== 'Sign out')"
                     :key="item.name"
                     v-slot="{ active }"
                   >
                     <router-link
-                      v-if="item.name !== 'Sign out'"
                       :to="item.href"
                       :class="[
                         active
@@ -125,9 +125,11 @@
                     >
                       {{ item.name }}
                     </router-link>
+                  </MenuItem>
 
+                  <!-- Logout -->
+                  <MenuItem>
                     <button
-                      v-else
                       @click="logout"
                       :class="[
                         'block w-full text-left px-4 py-2 text-sm',
@@ -170,6 +172,62 @@
         theme.darkMode ? 'bg-gray-900 text-gray-200' : 'bg-white text-gray-800'
       ]"
     >
+      <!-- 👤 User Mobile Menu -->
+      <div
+        :class="[
+          'border-t pt-4 pb-3 px-3 space-y-1 transition-colors duration-300',
+          theme.darkMode ? 'border-gray-700' : 'border-gray-200'
+        ]"
+      >
+        <!-- User avatar & info -->
+        <div class="flex items-center space-x-3">
+          <img
+            class="size-10 rounded-full border border-gray-500/30"
+            :src="auth.user?.avatar || 'https://via.placeholder.com/100?text=User'"
+            alt="User avatar"
+          />
+          <div>
+            <p class="text-sm font-medium">
+              {{ auth.user?.name || 'User' }}
+            </p>
+            <p class="text-xs opacity-70">
+              {{ auth.user?.email }}
+            </p>
+          </div>
+        </div>
+
+        <!-- User navigation items (safe version) -->
+        <div class="mt-3 space-y-1">
+          <router-link
+            v-for="userItem in userNavigation.filter(i => i.name !== 'Sign out')"
+            :key="userItem.name"
+            :to="userItem.href"
+            :class="[
+              'block px-3 py-2 text-sm rounded-md transition-all duration-150',
+              theme.darkMode
+                ? 'text-gray-300 hover:bg-gray-800'
+                : 'text-gray-700 hover:bg-gray-100'
+            ]"
+          >
+            {{ userItem.name }}
+          </router-link>
+
+          <!-- Logout -->
+          <button
+            @click="logout"
+            :class="[
+              'block w-full text-left px-3 py-2 text-sm rounded-md',
+              theme.darkMode
+                ? 'text-gray-300 hover:bg-gray-800'
+                : 'text-gray-700 hover:bg-gray-100'
+            ]"
+          >
+            Sign out
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile nav items -->
       <div class="space-y-1 px-2 pt-2 pb-3 sm:px-3">
         <DisclosureButton
           v-for="item in navigation"
@@ -191,7 +249,7 @@
         </DisclosureButton>
       </div>
 
-      <!-- 🌗 Dark Mode toggle in mobile -->
+      <!-- 🌗 Dark Mode toggle (mobile) -->
       <div
         :class="[
           'border-t pt-3 pb-4 px-3 transition-colors duration-300',
@@ -216,6 +274,7 @@
   </Disclosure>
 </template>
 
+
 <script setup>
 import {
   Disclosure,
@@ -230,6 +289,7 @@ import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '../stores/auth'
 import { useRouter, useRoute } from 'vue-router'
 import { useThemeStore } from '../stores/themeStore'
+import { onMounted } from 'vue'
 
 const theme = useThemeStore()
 const auth = useAuthStore()
@@ -260,5 +320,10 @@ const logout = async () => {
   }
 }
 
+onMounted(async () => {
+  if (!auth.user) {
+    await auth.fetchUser()
+  }
+})
 const isActive = (path) => route.path === path
 </script>

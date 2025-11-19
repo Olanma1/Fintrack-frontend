@@ -37,7 +37,6 @@ export const useMonoStore = defineStore("mono", {
 
         await api.get("/mono/sync");
 
-        // ⤵ After syncing on backend, re-fetch list
         await transactionStore.fetchTransactions();
       } catch (err) {
         console.error("Failed to sync transactions:", err);

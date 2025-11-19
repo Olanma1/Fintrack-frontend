@@ -328,18 +328,16 @@ const unlinkBank = async () => {
   }
 };
 
-
 // On mounted: fetch initial data
 onMounted(async () => {
-  await categoryStore.fetchCategories();
-  await transactionStore.fetchTransactions();
-
   try {
     const response = await api.get("/user");
     mono.isLinked = !!response.data.mono_account_id;
   } catch (e) {
     console.error("Unable to load user data", e);
   }
+  await categoryStore.fetchCategories();
+  await transactionStore.fetchTransactions();
 });
 
 
