@@ -3,7 +3,14 @@
     <!-- Navbar -->
     <nav class="bg-white shadow-sm py-4">
       <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
-        <h1 class="text-2xl font-bold text-indigo-600">FinTrack</h1>
+        <!-- New Stylish Logo -->
+        <div class="flex items-center text-lg font-bold tracking-wide">
+          <span class="text-indigo-500 text-3xl font-extrabold -mr-1" style="font-family: 'Dancing Script', cursive;">F</span>
+          <span :class="themeDark ? 'text-gray-100 text-lg' : 'text-gray-800 text-lg'">in</span>
+          <span class="text-indigo-500 text-3xl font-extrabold -mr-1" style="font-family: 'Dancing Script', cursive;">T</span>
+          <span :class="themeDark ? 'text-gray-100 text-lg' : 'text-gray-800 text-lg'">rack</span>
+        </div>
+
         <div class="space-x-4">
           <RouterLink to="/login" class="text-gray-700 hover:text-indigo-600">Login</RouterLink>
           <RouterLink
@@ -20,7 +27,13 @@
     <section class="flex flex-col-reverse md:flex-row items-center justify-between py-16 px-6 max-w-7xl mx-auto">
       <div class="md:w-1/2 mt-10 md:mt-0">
         <h2 class="text-4xl font-extrabold text-gray-900 leading-tight mb-4">
-          Take Control of Your Finances with <span class="text-indigo-600">FinTrack</span>
+          Take Control of Your Finances with 
+          <span class="text-lg font-bold tracking-wide">
+            <span class="text-indigo-500 text-3xl font-extrabold -mr-1" style="font-family: 'Dancing Script', cursive;">F</span>
+            <span :class="themeDark ? 'text-gray-100 text-lg' : 'text-gray-800 text-lg'">in</span>
+            <span class="text-indigo-500 text-3xl font-extrabold -mr-1" style="font-family: 'Dancing Script', cursive;">T</span>
+            <span :class="themeDark ? 'text-gray-100 text-lg' : 'text-gray-800 text-lg'">rack</span>
+          </span>
         </h2>
         <p class="text-gray-600 mb-6">
           FinTrack helps you manage income, expenses, and savings effortlessly. 
@@ -35,12 +48,12 @@
       </div>
 
       <div class="md:w-1/2 flex justify-center">
-            <img
-            src="https://cdn-icons-png.flaticon.com/128/12255/12255013.png"
-            alt="Finance Illustration"
-            class="w-full max-w-md mb-8"
-            />
-        </div>
+        <img
+          src="https://cdn-icons-png.flaticon.com/128/12255/12255013.png"
+          alt="Finance Illustration"
+          class="w-full max-w-md mb-8"
+        />
+      </div>
     </section>
 
     <!-- Core Values -->
@@ -133,7 +146,13 @@
     <section class="py-16 text-center bg-indigo-600 text-white">
       <h3 class="text-3xl font-semibold mb-4">Ready to Take Control?</h3>
       <p class="text-lg mb-6">
-        Join thousands of users already managing their finances smarter with FinTrack.
+        Join thousands of users already managing their finances smarter with 
+        <span class="flex items-center justify-center text-lg font-bold tracking-wide">
+          <span class="text-indigo-500 text-3xl font-extrabold -mr-1" style="font-family: 'Dancing Script', cursive;">F</span>
+          <span :class="themeDark ? 'text-gray-100 text-lg' : 'text-gray-100 text-lg'">in</span>
+          <span class="text-indigo-500 text-3xl font-extrabold -mr-1" style="font-family: 'Dancing Script', cursive;">T</span>
+          <span :class="themeDark ? 'text-gray-100 text-lg' : 'text-gray-100 text-lg'">rack</span>
+        </span>
       </p>
       <RouterLink
         to="/register"
@@ -145,16 +164,25 @@
 
     <!-- Footer -->
     <footer class="bg-gray-900 text-gray-400 text-center py-6">
-      <p>© {{ new Date().getFullYear() }} FinTrack. All rights reserved.</p>
+      <p>© {{ new Date().getFullYear() }} 
+        <span class="flex items-center justify-center text-lg font-bold tracking-wide inline-block">
+          <span class="text-indigo-500 text-3xl font-extrabold -mr-1" style="font-family: 'Dancing Script', cursive;">F</span>
+          <span :class="themeDark ? 'text-gray-100 text-lg' : 'text-gray-400 text-lg'">in</span>
+          <span class="text-indigo-500 text-3xl font-extrabold -mr-1" style="font-family: 'Dancing Script', cursive;">T</span>
+          <span :class="themeDark ? 'text-gray-100 text-lg' : 'text-gray-400 text-lg'">rack</span>
+        </span>
+        . All rights reserved.
+      </p>
     </footer>
   </div>
 </template>
 
 <script setup>
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
+const themeDark = ref(false); // You can hook this to your theme store if needed
 
 onMounted(() => {
   const token = localStorage.getItem("token"); 

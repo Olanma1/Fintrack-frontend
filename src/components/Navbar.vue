@@ -10,16 +10,29 @@
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="flex h-16 items-center justify-between">
         <!-- Left side -->
-        <div class="flex items-center">
-          <div class="shrink-0">
-            <img
-              class="size-8"
-              src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
-              alt="FinTrack"
-            />
-          </div>
-          <div class="ml-4 text-indigo-500 font-bold">💰 FinTrack</div>
-
+         <div class="flex items-center text-lg font-bold tracking-wide">
+    <!-- Stylish F -->
+    <span
+      class="text-indigo-500 text-3xl font-extrabold -mr-1"
+      style="font-family: 'Dancing Script', cursive;"
+    >
+      F
+    </span>
+    <!-- Remaining letters before T -->
+    <span :class="theme.darkMode ? 'text-gray-100 text-lg' : 'text-gray-800 text-lg'">
+      in
+    </span>
+    <!-- Stylish T -->
+    <span
+      class="text-indigo-500 text-3xl font-extrabold -mr-1"
+      style="font-family: 'Dancing Script', cursive;"
+    >
+      T
+    </span>
+    <!-- Remaining letters after T -->
+    <span :class="theme.darkMode ? 'text-gray-100 text-lg' : 'text-gray-800 text-lg'">
+      rack
+    </span>
           <!-- Desktop navigation -->
           <div class="hidden md:block">
             <div class="ml-10 flex items-baseline space-x-4">
@@ -48,7 +61,7 @@
         <!-- Right side -->
         <div class="hidden md:block">
           <div class="ml-4 flex items-center md:ml-6 space-x-3">
-            <!-- 🌗 Dark Mode Toggle -->
+            <!-- Dark Mode Toggle -->
             <button
               @click="theme.toggleDarkMode"
               :class="[
@@ -63,7 +76,7 @@
               <span>{{ theme.darkMode ? 'Dark' : 'Light' }}</span>
             </button>
 
-            <!-- 🔔 Notifications -->
+            <!-- Notifications -->
             <button
               type="button"
               :class="[
@@ -77,7 +90,7 @@
               <BellIcon class="size-6" aria-hidden="true" />
             </button>
 
-            <!-- 👤 Profile dropdown -->
+            <!-- Profile dropdown -->
             <Menu as="div" class="relative ml-3">
               <MenuButton
                 class="relative flex max-w-xs items-center cursor-pointer rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
@@ -106,7 +119,6 @@
                       : 'bg-white text-gray-800 border border-gray-200'
                   ]"
                 >
-                  <!-- Filtered to avoid v-if issues -->
                   <MenuItem
                     v-for="item in userNavigation.filter(i => i.name !== 'Sign out')"
                     :key="item.name"
@@ -127,7 +139,6 @@
                     </router-link>
                   </MenuItem>
 
-                  <!-- Logout -->
                   <MenuItem>
                     <button
                       @click="logout"
@@ -147,7 +158,7 @@
           </div>
         </div>
 
-        <!-- 📱 Mobile Menu Button -->
+        <!-- Mobile Menu Button -->
         <div class="-mr-2 flex md:hidden">
           <DisclosureButton
             :class="[
@@ -165,21 +176,20 @@
       </div>
     </div>
 
-    <!-- 📱 Mobile Menu Panel -->
+    <!-- Mobile Menu Panel -->
     <DisclosurePanel
       :class="[
         'md:hidden transition-colors duration-300',
         theme.darkMode ? 'bg-gray-900 text-gray-200' : 'bg-white text-gray-800'
       ]"
     >
-      <!-- 👤 User Mobile Menu -->
+      <!-- User info & mobile nav (same as before) -->
       <div
         :class="[
           'border-t pt-4 pb-3 px-3 space-y-1 transition-colors duration-300',
           theme.darkMode ? 'border-gray-700' : 'border-gray-200'
         ]"
       >
-        <!-- User avatar & info -->
         <div class="flex items-center space-x-3">
           <img
             class="size-10 rounded-full border border-gray-500/30"
@@ -187,16 +197,11 @@
             alt="User avatar"
           />
           <div>
-            <p class="text-sm font-medium">
-              {{ auth.user?.name || 'User' }}
-            </p>
-            <p class="text-xs opacity-70">
-              {{ auth.user?.email }}
-            </p>
+            <p class="text-sm font-medium">{{ auth.user?.name || 'User' }}</p>
+            <p class="text-xs opacity-70">{{ auth.user?.email }}</p>
           </div>
         </div>
 
-        <!-- User navigation items (safe version) -->
         <div class="mt-3 space-y-1">
           <router-link
             v-for="userItem in userNavigation.filter(i => i.name !== 'Sign out')"
@@ -204,22 +209,17 @@
             :to="userItem.href"
             :class="[
               'block px-3 py-2 text-sm rounded-md transition-all duration-150',
-              theme.darkMode
-                ? 'text-gray-300 hover:bg-gray-800'
-                : 'text-gray-700 hover:bg-gray-100'
+              theme.darkMode ? 'text-gray-300 hover:bg-gray-800' : 'text-gray-700 hover:bg-gray-100'
             ]"
           >
             {{ userItem.name }}
           </router-link>
 
-          <!-- Logout -->
           <button
             @click="logout"
             :class="[
               'block w-full text-left px-3 py-2 text-sm rounded-md',
-              theme.darkMode
-                ? 'text-gray-300 hover:bg-gray-800'
-                : 'text-gray-700 hover:bg-gray-100'
+              theme.darkMode ? 'text-gray-300 hover:bg-gray-800' : 'text-gray-700 hover:bg-gray-100'
             ]"
           >
             Sign out
@@ -227,7 +227,6 @@
         </div>
       </div>
 
-      <!-- Mobile nav items -->
       <div class="space-y-1 px-2 pt-2 pb-3 sm:px-3">
         <DisclosureButton
           v-for="item in navigation"
@@ -249,7 +248,6 @@
         </DisclosureButton>
       </div>
 
-      <!-- 🌗 Dark Mode toggle (mobile) -->
       <div
         :class="[
           'border-t pt-3 pb-4 px-3 transition-colors duration-300',
@@ -273,7 +271,6 @@
     </DisclosurePanel>
   </Disclosure>
 </template>
-
 
 <script setup>
 import {
