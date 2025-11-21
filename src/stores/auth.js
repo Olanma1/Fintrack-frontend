@@ -60,6 +60,18 @@ export const useAuthStore = defineStore("auth", {
       console.log(error);
       throw error;
     }
+  },
+
+    async deleteAccount() {
+    try {
+      await api.delete("/user/delete");
+    } catch (error) {
+      console.log(error);
+    } finally {
+      this.user = null;
+      this.token = null;
+      localStorage.removeItem("token");
+    }
   }
 
   },
